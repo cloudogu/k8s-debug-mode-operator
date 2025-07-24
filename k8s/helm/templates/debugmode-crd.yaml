@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
-  {{- include "chart.labels" . | nindent 4 }}
+  {{- include "helm.labels" . | nindent 4 }}
 spec:
-  group: k8s.cloudogu.com
+  group: k8s.cloudogu.com.k8s.cloudogu.com
   names:
     kind: DebugMode
     listKind: DebugModeList
