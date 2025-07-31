@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/google/go-cmp/cmp"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +34,21 @@ type DebugModeReconciler struct {
 func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = logf.FromContext(ctx)
 
-	// TODO(user): your logic here
+	cr := &k8sCRLib.DebugMode{}
+	if err := r.Get(ctx, req.NamespacedName, cr); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	old := cr.DeepCopy()
+	diff := cmp.Diff(old.Spec, cr.Spec)
+	if diff != "" {
+		logf.FromContext(ctx).Info(diff)
+	}
+
+	diffStatus := cmp.Diff(old.Status, cr.Status)
+	if diffStatus != "" {
+		logf.FromContext(ctx).Info(diffStatus)
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -41,7 +56,7 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 // SetupWithManager sets up the controller with the Manager.
 func (r *DebugModeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&k8sCRLib1.DebugMode{}).
+		For(&k8sCRLib.DebugMode{}).
 		Named("debugmode").
 		Complete(r)
 }
