@@ -1,6 +1,6 @@
 module github.com/cloudogu/k8s-debug-mode-operator
 
-go 1.24.0
+go 1.24.1
 
 require (
 	github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20250731095834-ab9a5f530e5e
