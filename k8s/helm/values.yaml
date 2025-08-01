@@ -1,3 +1,6 @@
+global:
+  imagePullSecrets:
+    - name: "ces-container-registries"
 controllerManager:
   manager:
     args:
@@ -11,8 +14,9 @@ controllerManager:
         - ALL
       readOnlyRootFilesystem: true
     image:
-      repository: controller
-      tag: latest
+      registry: docker.io
+      repository: cloudogu/k8s-debug-mode-operator
+      tag: 0.1.0
     resources:
       limits:
         cpu: 500m
@@ -20,6 +24,12 @@ controllerManager:
       requests:
         cpu: 10m
         memory: 64Mi
+    env:
+      logLevel: info
+      stage: production
+      helmClientTimeoutMins: "15"
+      rollbackReleaseTimeoutMins: "15"
+      healthSyncIntervalMins: "2"
   podSecurityContext:
     runAsNonRoot: true
     seccompProfile:
