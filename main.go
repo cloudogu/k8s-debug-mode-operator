@@ -6,14 +6,18 @@ import (
 	"fmt"
 	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/controller"
+	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
 	"github.com/cloudogu/k8s-registry-lib/dogu"
 	"github.com/cloudogu/k8s-registry-lib/repository"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -25,7 +29,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerruntimeconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	k8scloudogucomv1 "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 	k8scloudogucomclient "github.com/cloudogu/k8s-debug-mode-cr-lib/pkg/client"
@@ -33,8 +36,10 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme      = runtime.NewScheme()
+	operatorLog = ctrl.Log.WithName("debug-mode-operator")
+	metricsAddr string
+	probeAddr   string
 )
 
 type controllerManager interface {
@@ -50,67 +55,45 @@ type ecosystemClientSet struct {
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(k8scloudogucomv1.AddToScheme(scheme))
+
 	// +kubebuilder:scaffold:scheme
 }
 
-// nolint:gocyclo
 func main() {
-	var enableLeaderElection bool
-	var probeAddr string
-
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
-	flag.Parse()
-
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		HealthProbeBindAddress: probeAddr,
-		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "f94b25f5.k8s.cloudogu.com",
-		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
-		// when the Manager ends. This requires the binary to immediately end when the
-		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
-		// speeds up voluntary leader transitions as the new leader don't have to wait
-		// LeaseDuration time first.
-		//
-		// In the default scaffold provided, the program ends immediately after
-		// the manager stops, so would be fine to enable this option. However,
-		// if you are doing or is intended to do any operation such as perform cleanups
-		// after the manager stops then its usage might be unsafe.
-		// LeaderElectionReleaseOnCancel: true,
-	})
-	if err != nil {
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
-
-	setupLog.Info("starting manager")
-
+	logging.ConfigureLogger()
 	ctx := ctrl.SetupSignalHandler()
-	restConfig := controllerruntimeconfig.GetConfigOrDie()
+	opLogger := log.FromContext(ctx)
+	opLogger.Info("1")
 
-	err = startOperator(ctx, mgr, restConfig)
+	err := startOperator()
 	if err != nil {
-		setupLog.Error(err, "unable to start operator")
+		operatorLog.Error(err, "failed to start operator")
 		os.Exit(1)
 	}
-
 }
 
-func startOperator(
-	ctx context.Context,
-	k8sManager ctrl.Manager,
-	restConfig *rest.Config,
-) error {
-	k8sClientSet, err := kubernetes.NewForConfig(restConfig)
+func startOperator() error {
+	fmt.Printf("Hello There ----------")
 
+	restConfig := controllerruntimeconfig.GetConfigOrDie()
+
+	options := getK8sManagerOptions()
+
+	k8sManager, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+	if err != nil {
+		return fmt.Errorf("failed to start manager: %w", err)
+	}
+
+	ctx := ctrl.SetupSignalHandler()
+
+	opLogger := log.FromContext(ctx)
+	opLogger.Info("1")
+
+	k8sClientSet, err := kubernetes.NewForConfig(restConfig)
+	opLogger.Info("2")
 	debugModeClient, err := createDebugModeClientSet(restConfig)
+	opLogger.Info("3")
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to create debug mode client set: %w", err)
 	}
@@ -194,6 +177,25 @@ func configureManager(k8sManager controllerManager, debugModeReconciler *control
 	return nil
 }
 
+func getK8sManagerOptions() manager.Options {
+	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+
+	options := ctrl.Options{
+		Scheme:  scheme,
+		Metrics: server.Options{BindAddress: metricsAddr},
+		Cache: cache.Options{ByObject: map[client.Object]cache.ByObject{
+			// Restrict namespace for components only as we want to reconcile Deployments,
+			// StatefulSets and DaemonSets across all namespaces.
+			&k8scloudogucomv1.DebugMode{}: {Namespaces: map[string]cache.Config{
+				"ecosystem": {},
+			}},
+		}},
+		HealthProbeBindAddress: probeAddr,
+	}
+
+	return options
+}
 func startK8sManager(ctx context.Context, k8sManager controllerManager) error {
 	logger := log.FromContext(ctx).WithName("k8s-manager-start")
 	logger.Info("starting manager")

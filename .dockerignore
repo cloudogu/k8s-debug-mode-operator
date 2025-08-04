@@ -9,3 +9,5 @@
 !cmd/**/*
 !internal/**/*
 !config/**/*
+!build/**/*
+!Makefile

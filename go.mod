@@ -8,7 +8,7 @@ require (
 	github.com/cloudogu/ces-commons-lib v0.2.0
 	github.com/cloudogu/cesapp-lib v0.18.1
 	github.com/cloudogu/k8s-component-operator v1.10.0
-	github.com/cloudogu/k8s-debug-mode-cr-lib v0.1.0
+	github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20250804123837-d298b3b77317
 	github.com/cloudogu/k8s-dogu-lib/v2 v2.9.0
 	github.com/cloudogu/k8s-registry-lib v0.5.1
 	github.com/sirupsen/logrus v1.9.3
@@ -16,6 +16,8 @@ require (
 	k8s.io/client-go v0.33.2
 	sigs.k8s.io/controller-runtime v0.21.0
 )
+
+require go.uber.org/zap v1.27.0
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -114,7 +116,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.39.0 // indirect

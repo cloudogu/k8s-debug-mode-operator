@@ -29,6 +29,17 @@ include build/make/k8s.mk
 
 ##@ Deployment
 
+.PHONY: helm-repo-config
+helm-repo-config: ## Creates a configMap and a secret for the helm repo connection from env var HELM_REPO_ENDPOINT and either HELM_REPO_USERNAME & HELM_REPO_PASSWORD or HELM_AUTH_BASE64.
+	@kubectl create configmap debug-mode-operator-helm-repository --namespace=ecosystem --from-literal=endpoint=${HELM_REPO_ENDPOINT} --from-literal=schema=oci --from-literal=plainHttp=${HELM_REPO_PLAIN_HTTP}
+	@if [ -z ${HELM_AUTH_BASE64} ]; then \
+	  	echo "Using fields HELM_REPO_USERNAME & HELM_REPO_PASSWORD to create secret!" ;\
+		kubectl create secret generic debug-mode-operator-helm-registry --namespace=ecosystem --from-literal=config.json='{"auths": {"${HELM_REPO_ENDPOINT}": {"auth": "$(shell printf "%s:%s" "${HELM_REPO_USERNAME}" "${HELM_REPO_PASSWORD}" | base64 -w0)"}}}' ;\
+	else \
+		echo "Using field HELM_AUTH_BASE64 to create secret!" ;\
+		kubectl create secret generic debug-mode-operator-helm-registry --namespace=ecosystem --from-literal=config.json='{"auths": {"${HELM_REPO_ENDPOINT}": {"auth": "${HELM_AUTH_BASE64}"}}}' ;\
+	fi
+
 .PHONY: template-stage
 template-stage: $(BINARY_YQ)
 	@if [[ ${STAGE} == "development" ]]; then \
