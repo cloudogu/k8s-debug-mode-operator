@@ -6,3 +6,6 @@
 !interfaces.go
 !go.*
 !pkg/**/*
+!cmd/**/*
+!internal/**/*
+!config/**/*

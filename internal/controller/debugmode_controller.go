@@ -2,20 +2,39 @@ package controller
 
 import (
 	"context"
-	"github.com/google/go-cmp/cmp"
+	"fmt"
+	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
+	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
+	doguClient "github.com/cloudogu/k8s-dogu-lib/v2/client"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 )
 
 // DebugModeReconciler reconciles a DebugMode object
 type DebugModeReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
+	client                  debugModeV1Interface
+	doguInterface           doguClient.DoguInterface
+	componentInterface      componentClient.ComponentInterface
+	doguLogLevelGetter      loglevel.DoguLogLevelGetter
+	componentLogLevelGetter loglevel.ComponentLogLevelGetter
+}
+
+func NewDebugModeReconciler(client debugModeV1Interface,
+	doguInterface doguClient.DoguInterface,
+	componentInterface componentClient.ComponentInterface,
+	doguLogLevelGetter loglevel.DoguLogLevelGetter,
+	componentLogLevelGetter loglevel.ComponentLogLevelGetter) *DebugModeReconciler {
+	return &DebugModeReconciler{
+		client:                  client,
+		doguInterface:           doguInterface,
+		componentInterface:      componentInterface,
+		doguLogLevelGetter:      doguLogLevelGetter,
+		componentLogLevelGetter: componentLogLevelGetter,
+	}
 }
 
 // +kubebuilder:rbac:groups=k8s.cloudogu.com.k8s.cloudogu.com,resources=debugmodes,verbs=get;list;watch;create;update;patch;delete
@@ -32,25 +51,54 @@ type DebugModeReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	logger := logf.FromContext(ctx)
 
-	cr := &k8sCRLib.DebugMode{}
-	if err := r.Get(ctx, req.NamespacedName, cr); err != nil {
+	debugModeInterface := r.client.DebugMode(req.Namespace)
+
+	cr, err := debugModeInterface.Get(ctx, req.Name, v1.GetOptions{})
+	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	old := cr.DeepCopy()
-	diff := cmp.Diff(old.Spec, cr.Spec)
-	if diff != "" {
-		logf.FromContext(ctx).Info(diff)
+	logger.Info(fmt.Sprintf("Found a CR with endtime: %s", cr.Spec.DeactivateTimestamp))
+
+	// List all Dogus
+	doguList, err := r.doguInterface.List(ctx, v1.ListOptions{})
+	r.handleErrorWithReconcile(ctx, "ERROR: Failed to list dogus: %w", err)
+	logger.Info(fmt.Sprintf("%v", doguList))
+
+	if len(doguList.Items) > 0 {
+		for _, dogu := range doguList.Items {
+			doguLogLevel, err := r.doguLogLevelGetter.GetLogLevelForDogu(ctx, dogu.Name)
+			if err != nil {
+				logger.Error(err, fmt.Sprintf("ERROR: Failed to get LogLevel for dogu %s: %w", dogu.Name, err))
+			}
+
+			logger.Info(fmt.Sprintf("xxxxxxxxxxxxxxxxxxxxxxxxxxxx %s", doguLogLevel.String()))
+		}
 	}
 
-	diffStatus := cmp.Diff(old.Status, cr.Status)
-	if diffStatus != "" {
-		logf.FromContext(ctx).Info(diffStatus)
+	componentList, err := r.componentInterface.List(ctx, v1.ListOptions{})
+	if len(componentList.Items) > 0 {
+		for _, component := range componentList.Items {
+			componentLogLevel, err := r.componentLogLevelGetter.GetLogLevelForComponent(ctx, component)
+			if err != nil {
+				logger.Error(err, fmt.Sprintf("ERROR: Failed to get LogLevel for component %s: %w", component.Name, err))
+			}
+			logger.Info(fmt.Sprintf("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy %s", componentLogLevel.String()))
+		}
 	}
+
+	logger.Info(fmt.Sprintf("%v", doguList))
 
 	return ctrl.Result{}, nil
+}
+
+func (r *DebugModeReconciler) handleErrorWithReconcile(ctx context.Context, msg string, err error) {
+	logger := logf.FromContext(ctx)
+	if err != nil {
+		logger.Error(err, fmt.Sprintf(msg, err))
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

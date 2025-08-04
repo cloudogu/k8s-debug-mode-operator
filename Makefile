@@ -25,6 +25,7 @@ include build/make/digital-signature.mk
 include build/make/mocks.mk
 
 include build/make/k8s-controller.mk
+include build/make/k8s.mk
 
 ##@ Deployment
 
