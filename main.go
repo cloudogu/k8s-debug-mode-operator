@@ -64,9 +64,11 @@ func main() {
 	logging.ConfigureLogger()
 	ctx := ctrl.SetupSignalHandler()
 	opLogger := log.FromContext(ctx)
-	opLogger.Info("1")
+
+	opLogger.Info("Logger from main")
 
 	err := startOperator(ctx)
+
 	if err != nil {
 		operatorLog.Error(err, "failed to start operator")
 		os.Exit(1)
@@ -74,35 +76,36 @@ func main() {
 }
 
 func startOperator(ctx context.Context) error {
-	fmt.Printf("Hello There ----------")
+	logger := log.FromContext(ctx)
+	logger.Info("Start Debug Mode Operator")
 
+	logger.Info(" - get config")
 	restConfig := controllerruntimeconfig.GetConfigOrDie()
-
+	logger.Info(" - get options")
 	options := getK8sManagerOptions()
-
+	logger.Info(" - get create manager")
 	k8sManager, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		return fmt.Errorf("failed to start manager: %w", err)
 	}
-
-	opLogger := log.FromContext(ctx)
-	opLogger.Info("1")
-
+	logger.Info(" - get k8sclientset")
 	k8sClientSet, err := kubernetes.NewForConfig(restConfig)
-	opLogger.Info("2")
+	logger.Info(" - get debugmodeclientset")
 	debugModeClient, err := createDebugModeClientSet(restConfig)
-	opLogger.Info("3")
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to create debug mode client set: %w", err)
 	}
+	logger.Info(" - get doguclientset")
 	doguClientSet, err := createDoguClientSet(restConfig)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to create dogu client set: %w", err)
 	}
+	logger.Info(" - get componentclientset")
 	componentClientSet, err := createComponentClientSet(restConfig)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to create dogu client set: %w", err)
 	}
+	logger.Info(" - get eco")
 	ecoClientSet := ecosystemClientSet{
 		k8sClientSet,
 		debugModeClient,
@@ -111,7 +114,7 @@ func startOperator(ctx context.Context) error {
 	}
 
 	v1DebugMode := ecoClientSet.DebugModeV1()
-
+	logger.Info(" - get configmapclientset")
 	configMapClient := k8sClientSet.CoreV1().ConfigMaps("ecosystem")
 	doguConfig := repository.NewDoguConfigRepository(configMapClient)
 	doguDescriptorGetter := controller.NewDoguGetter(
