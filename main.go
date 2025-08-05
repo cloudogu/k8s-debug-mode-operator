@@ -66,14 +66,14 @@ func main() {
 	opLogger := log.FromContext(ctx)
 	opLogger.Info("1")
 
-	err := startOperator()
+	err := startOperator(ctx)
 	if err != nil {
 		operatorLog.Error(err, "failed to start operator")
 		os.Exit(1)
 	}
 }
 
-func startOperator() error {
+func startOperator(ctx context.Context) error {
 	fmt.Printf("Hello There ----------")
 
 	restConfig := controllerruntimeconfig.GetConfigOrDie()
@@ -84,8 +84,6 @@ func startOperator() error {
 	if err != nil {
 		return fmt.Errorf("failed to start manager: %w", err)
 	}
-
-	ctx := ctrl.SetupSignalHandler()
 
 	opLogger := log.FromContext(ctx)
 	opLogger.Info("1")
