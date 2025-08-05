@@ -52,18 +52,25 @@ func NewDebugModeReconciler(client debugModeV1Interface,
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := logf.FromContext(ctx)
+	logger.Info("Starting Reconcile for DebugMode abc")
+	logger.Info("--- 0")
+	debugModeClient := r.client.DebugMode(req.Namespace)
+	logger.Info("--- a")
 
-	debugModeInterface := r.client.DebugMode(req.Namespace)
-
-	cr, err := debugModeInterface.Get(ctx, req.Name, v1.GetOptions{})
+	cr, err := debugModeClient.Get(ctx, req.Name, v1.GetOptions{})
+	logger.Info("--- b")
 	if err != nil {
+		logger.Error(err, fmt.Sprintf("ERROR: failed to get CR with name %s", req.Name))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
 
+	}
+	logger.Info("--- c")
 	logger.Info(fmt.Sprintf("Found a CR with endtime: %s", cr.Spec.DeactivateTimestamp))
+	logger.Info("--- d")
 
 	// List all Dogus
 	doguList, err := r.doguInterface.List(ctx, v1.ListOptions{})
+	logger.Info("--- e")
 	r.handleErrorWithReconcile(ctx, "ERROR: Failed to list dogus: %w", err)
 	logger.Info(fmt.Sprintf("%v", doguList))
 
@@ -105,6 +112,5 @@ func (r *DebugModeReconciler) handleErrorWithReconcile(ctx context.Context, msg 
 func (r *DebugModeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8sCRLib.DebugMode{}).
-		Named("debugmode").
 		Complete(r)
 }

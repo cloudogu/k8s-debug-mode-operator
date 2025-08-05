@@ -7,9 +7,9 @@ controllerManager:
       registry: docker.io
       repository: cloudogu/k8s-debug-mode-operator
       tag: 0.0.0
-    imagePullPolicy: IfNotPresent
+    imagePullPolicy: Always
     env:
-      logLevel: info
+      logLevel: debug
       stage: production
       helmClientTimeoutMins: "15"
       rollbackReleaseTimeoutMins: "15"
@@ -21,3 +21,5 @@ controllerManager:
       requests:
         cpu: 10m
         memory: 64Mi
+    networkPolicies:
+      enabled: true

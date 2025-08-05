@@ -26,4 +26,4 @@ appVersion: "0.0.0-replaceme"
 annotations:
   # Dependency for the Component-CRD.
   # Allow all versions up to next major version to avoid breaking changes
-  "k8s.cloudogu.com/ces-dependency/k8s-debug-mode-operator-crd": "0.1.0"
+  "k8s.cloudogu.com/ces-dependency/k8s-debug-mode-operator-crd": "0.x.x"
