@@ -11,6 +11,7 @@ import (
 	"github.com/cloudogu/k8s-registry-lib/dogu"
 	"github.com/cloudogu/k8s-registry-lib/repository"
 	"k8s.io/client-go/kubernetes"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -49,6 +50,7 @@ type ecosystemClientSet struct {
 	k8scloudogucomclient.DebugModeEcosystemInterface
 	doguClient.EcoSystemV2Client
 	componentClient.V1Alpha1Client
+	corev1.ConfigMapInterface
 }
 
 func init() {
@@ -142,15 +144,17 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 		return fmt.Errorf("ERROR: failed to create component client set: %w", err)
 	}
 
+	configMapClient := k8sClientSet.CoreV1().ConfigMaps("ecosystem")
+
 	ecoClientSet := ecosystemClientSet{
 		k8sClientSet,
 		debugModeClientSet,
 		*doguClientSet,
 		*componentClientSet,
+		configMapClient,
 	}
 
 	v1DebugMode := ecoClientSet.DebugModeV1()
-	configMapClient := k8sClientSet.CoreV1().ConfigMaps("ecosystem")
 	doguConfig := repository.NewDoguConfigRepository(configMapClient)
 	doguDescriptorGetter := controller.NewDoguGetter(
 		dogu.NewDoguVersionRegistry(configMapClient),

@@ -2,7 +2,6 @@ package loglevel
 
 import (
 	"context"
-	"fmt"
 	v1 "github.com/cloudogu/k8s-component-operator/pkg/api/v1"
 )
 
@@ -23,13 +22,13 @@ func (r *ComponentLogLevelGetter) GetLogLevelForComponent(ctx context.Context, c
 }
 
 func (r *ComponentLogLevelGetter) getLogLevel(ctx context.Context, component v1.Component) (LogLevel, error) {
+	loglevel := defaultMainLogLevel
 	if component.Spec.MappedValues != nil {
 		val, ok := component.Spec.MappedValues[mappedLogLevelKey]
 		// If the key exists
-		if !ok {
-			val = defaultMainLogLevel
+		if ok {
+			loglevel = val
 		}
-		return CreateLogLevelFromString(val)
 	}
-	return LevelUnknown, fmt.Errorf("failed to get loglevel")
+	return CreateLogLevelFromString(loglevel)
 }

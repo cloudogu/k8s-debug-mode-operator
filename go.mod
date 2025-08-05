@@ -8,7 +8,7 @@ require (
 	github.com/cloudogu/ces-commons-lib v0.2.0
 	github.com/cloudogu/cesapp-lib v0.18.1
 	github.com/cloudogu/k8s-component-operator v1.10.0
-	github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20250804123837-d298b3b77317
+	github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20250805104618-a63c1eb57cd7
 	github.com/cloudogu/k8s-dogu-lib/v2 v2.9.0
 	github.com/cloudogu/k8s-registry-lib v0.5.1
 	github.com/sirupsen/logrus v1.9.3
