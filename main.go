@@ -15,6 +15,7 @@ import (
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -84,7 +85,7 @@ func startOperator(ctx context.Context) error {
 	logger.Info(" - get options")
 	options := getK8sManagerOptions()
 	logger.Info(" - get create manager")
-	k8sManager, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+	k8sManager, err := ctrl.NewManager(restConfig, options)
 	if err != nil {
 		return fmt.Errorf("failed to start manager: %w", err)
 	}
@@ -121,7 +122,7 @@ func startOperator(ctx context.Context) error {
 		dogu.NewDoguVersionRegistry(configMapClient),
 		dogu.NewLocalDoguDescriptorRepository(configMapClient),
 	)
-
+	logger.Info(" - get getter")
 	doguLogLevelGetter := loglevel.NewDoguLogLevelGetter(doguConfig, doguDescriptorGetter)
 	componentLogLevelGetter := loglevel.NewComponentLogLevelGetter()
 
@@ -131,12 +132,12 @@ func startOperator(ctx context.Context) error {
 		*doguLogLevelGetter,
 		*componentLogLevelGetter,
 	)
-
+	logger.Info(" - configure manager")
 	err = configureManager(k8sManager, debugModeReconciler)
 	if err != nil {
 		return fmt.Errorf("unable to configure manager: %w", err)
 	}
-
+	logger.Info(" - start manager")
 	err = startK8sManager(ctx, k8sManager)
 	if err != nil {
 		return fmt.Errorf("unable to start operator: %w", err)
@@ -171,10 +172,18 @@ func createComponentClientSet(config *rest.Config) (*componentClient.V1Alpha1Cli
 }
 
 func configureManager(k8sManager controllerManager, debugModeReconciler *controller.DebugModeReconciler) error {
+
 	err := debugModeReconciler.SetupWithManager(k8sManager)
 	if err != nil {
 		return fmt.Errorf("unable to configure reconciler: %w", err)
 	}
+
+	// +kubebuilder:scaffold:builder
+	err = addChecks(k8sManager)
+	if err != nil {
+		return fmt.Errorf("failed to add checks to the manager: %w", err)
+	}
+
 	return nil
 }
 
@@ -202,6 +211,20 @@ func startK8sManager(ctx context.Context, k8sManager controllerManager) error {
 	logger.Info("starting manager")
 	if err := k8sManager.Start(ctx); err != nil {
 		return fmt.Errorf("ERROR: problem running manager: %w", err)
+	}
+	logger.Info("manager started")
+	return nil
+}
+
+func addChecks(mgr manager.Manager) error {
+	err := mgr.AddHealthzCheck("healthz", healthz.Ping)
+	if err != nil {
+		return fmt.Errorf("failed to add healthz check: %w", err)
+	}
+
+	err = mgr.AddReadyzCheck("readyz", healthz.Ping)
+	if err != nil {
+		return fmt.Errorf("failed to add readyz check: %w", err)
 	}
 
 	return nil
