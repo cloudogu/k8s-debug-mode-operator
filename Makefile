@@ -1,6 +1,6 @@
 # Set these to the desired values
 ARTIFACT_ID=k8s-debug-mode-operator
-VERSION=0.0.7
+VERSION=0.0.0
 IMAGE=cloudogu/${ARTIFACT_ID}:${VERSION}
 GOTAG=1.24.1
 MAKEFILES_VERSION=10.2.0
