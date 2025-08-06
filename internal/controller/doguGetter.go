@@ -7,19 +7,19 @@ import (
 	"github.com/cloudogu/cesapp-lib/core"
 )
 
-type doguGetter struct {
+type DoguGetter struct {
 	versionRegistry doguVersionRegistry
 	doguRepository  localDoguDescriptorRepository
 }
 
-func NewDoguGetter(versionRegistry doguVersionRegistry, doguRepository localDoguDescriptorRepository) *doguGetter {
-	return &doguGetter{
+func NewDoguGetter(versionRegistry doguVersionRegistry, doguRepository localDoguDescriptorRepository) *DoguGetter {
+	return &DoguGetter{
 		versionRegistry: versionRegistry,
 		doguRepository:  doguRepository,
 	}
 }
 
-func (r *doguGetter) GetCurrent(ctx context.Context, simpleDoguName string) (*core.Dogu, error) {
+func (r *DoguGetter) GetCurrent(ctx context.Context, simpleDoguName string) (*core.Dogu, error) {
 	current, err := r.versionRegistry.GetCurrent(ctx, dogu.SimpleName(simpleDoguName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current version for dogu %s: %w", simpleDoguName, err)
@@ -30,7 +30,7 @@ func (r *doguGetter) GetCurrent(ctx context.Context, simpleDoguName string) (*co
 	}
 	return get, nil
 }
-func (r *doguGetter) GetCurrentOfAll(ctx context.Context) ([]*core.Dogu, error) {
+func (r *DoguGetter) GetCurrentOfAll(ctx context.Context) ([]*core.Dogu, error) {
 	allCurrentDoguVersions, err := r.versionRegistry.GetCurrentOfAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all current dogu versions: %w", err)

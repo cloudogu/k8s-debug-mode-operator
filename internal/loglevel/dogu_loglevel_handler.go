@@ -41,7 +41,7 @@ func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, d v2.Dogu) (LogLe
 	return r.getLogLevel(ctx, d.Name, doguConfig)
 }
 
-func (r *DoguLogLevelHandler) SetLogLevelForDogu(ctx context.Context, name string, logLevel LogLevel) error {
+func (r *DoguLogLevelHandler) SetLogLevel(ctx context.Context, name string, logLevel LogLevel) error {
 	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(name))
 	if err != nil {
 		return fmt.Errorf("ERROR: Failed to get LogLevel: %w", err)
@@ -105,18 +105,18 @@ func (r *DoguLogLevelHandler) getDefaultLogLevel(ctx context.Context, doguName s
 	return defaultLevelStr, nil
 }
 
-func (s *DoguLogLevelHandler) setLogLevel(ctx context.Context, doguName string, doguConfig config.DoguConfig, l LogLevel) (bool, error) {
+func (r *DoguLogLevelHandler) setLogLevel(ctx context.Context, doguName string, doguConfig config.DoguConfig, l LogLevel) (bool, error) {
 
-	currentLogLevel, err := s.getLogLevel(ctx, doguName, doguConfig)
+	currentLogLevel, err := r.getLogLevel(ctx, doguName, doguConfig)
 	if err != nil {
-		return false, fmt.Errorf("Error getting current log level %s: %w", doguName, err)
+		return false, fmt.Errorf("error getting current log level %s: %w", doguName, err)
 	}
 
 	if currentLogLevel == l {
 		return false, nil
 	}
 
-	if lErr := s.writeLogLevel(ctx, doguConfig, l); lErr != nil {
+	if lErr := r.writeLogLevel(ctx, doguConfig, l); lErr != nil {
 		return false, fmt.Errorf("could not change log level from %s to %s: %w", currentLogLevel, l.String(), err)
 	}
 
@@ -125,13 +125,13 @@ func (s *DoguLogLevelHandler) setLogLevel(ctx context.Context, doguName string, 
 	return true, nil
 }
 
-func (s *DoguLogLevelHandler) writeLogLevel(ctx context.Context, dConfig config.DoguConfig, l LogLevel) error {
+func (r *DoguLogLevelHandler) writeLogLevel(ctx context.Context, dConfig config.DoguConfig, l LogLevel) error {
 	doguConfig, err := dConfig.Set(loggingKey, config.Value(l.String()))
 	if err != nil {
 		return fmt.Errorf("could not write to dogu config: %w", err)
 	}
 
-	dConfig, err = s.doguConfigRepository.Update(ctx, config.DoguConfig{DoguName: dConfig.DoguName, Config: doguConfig})
+	dConfig, err = r.doguConfigRepository.Update(ctx, config.DoguConfig{DoguName: dConfig.DoguName, Config: doguConfig})
 	if err != nil {
 		return fmt.Errorf("could not update dogu config for dogu %q: %w", dConfig.DoguName, err)
 	}

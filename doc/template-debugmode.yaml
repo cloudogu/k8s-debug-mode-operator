@@ -4,4 +4,4 @@ metadata:
   name: k8s-debug-mode-operator-crd
 spec:
   targetLogLevel: debug
-  deactivateTimestamp: 2025-08-06T15:30:00Z
+  deactivateTimestamp: 2025-08-05T15:30:01Z

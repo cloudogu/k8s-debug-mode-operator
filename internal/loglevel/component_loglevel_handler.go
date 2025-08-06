@@ -23,7 +23,7 @@ func NewComponentLogLevelHandler(componentInterface componentClient.ComponentInt
 	}
 }
 
-func (r *ComponentLogLevelHandler) GetLogLevelForComponent(ctx context.Context, component v1.Component) (LogLevel, error) {
+func (r *ComponentLogLevelHandler) GetLogLevel(ctx context.Context, component v1.Component) (LogLevel, error) {
 	return r.getLogLevel(component)
 }
 
