@@ -2,7 +2,6 @@ package loglevel
 
 import (
 	"context"
-	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
 	v1 "github.com/cloudogu/k8s-component-operator/pkg/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
@@ -15,10 +14,10 @@ const (
 )
 
 type ComponentLogLevelHandler struct {
-	componentInterface componentClient.ComponentInterface
+	componentInterface ComponentInterface
 }
 
-func NewComponentLogLevelHandler(componentInterface componentClient.ComponentInterface) *ComponentLogLevelHandler {
+func NewComponentLogLevelHandler(componentInterface ComponentInterface) *ComponentLogLevelHandler {
 	return &ComponentLogLevelHandler{
 		componentInterface: componentInterface,
 	}

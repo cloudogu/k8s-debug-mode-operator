@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/cloudogu/ces-commons-lib/dogu"
 	v2 "github.com/cloudogu/k8s-dogu-lib/v2/api/v2"
-	doguClient "github.com/cloudogu/k8s-dogu-lib/v2/client"
 	"github.com/cloudogu/k8s-registry-lib/config"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,13 +18,13 @@ const (
 type DoguLogLevelHandler struct {
 	doguConfigRepository DoguConfigRepository
 	doguDescriptorGetter DoguDescriptorGetter
-	doguRestartClient    doguClient.DoguRestartInterface
+	doguRestartClient    DoguRestartInterface
 }
 
 func NewDoguLogLevelHandler(
 	doguConfigRepository DoguConfigRepository,
 	doguDescriptorGetter DoguDescriptorGetter,
-	doguRestartClient doguClient.DoguRestartInterface) *DoguLogLevelHandler {
+	doguRestartClient DoguRestartInterface) *DoguLogLevelHandler {
 	return &DoguLogLevelHandler{
 		doguConfigRepository: doguConfigRepository,
 		doguDescriptorGetter: doguDescriptorGetter,

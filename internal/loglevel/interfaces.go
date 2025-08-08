@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/cloudogu/ces-commons-lib/dogu"
 	"github.com/cloudogu/cesapp-lib/core"
+	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
+	doguClient "github.com/cloudogu/k8s-dogu-lib/v2/client"
 	"github.com/cloudogu/k8s-registry-lib/config"
 )
 
@@ -25,4 +27,12 @@ type LogLevelHandler interface {
 	SetLogLevel(ctx context.Context, element any, targetLogLevel LogLevel) error
 	Restart(ctx context.Context, name string) error
 	Kind() string
+}
+
+type ComponentInterface interface {
+	componentClient.ComponentInterface
+}
+
+type DoguRestartInterface interface {
+	doguClient.DoguRestartInterface
 }
