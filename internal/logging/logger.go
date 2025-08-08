@@ -26,11 +26,11 @@ func (l Logger) Info(msg string, keysAndValues ...any) {
 }
 
 func (l Logger) Error(msg string, keysAndValues ...any) {
-	l.logger.Info(msg, keysAndValues...)
+	l.logger.V(2).GetSink().Info(-2, msg, keysAndValues...)
 }
 
 func (l Logger) Debug(msg string, keysAndValues ...any) {
-	l.logger.V(5).Info(msg, keysAndValues...)
+	l.logger.V(-1).GetSink().Info(1, msg, keysAndValues...)
 }
 
 func ConfigureLogger() {
