@@ -34,6 +34,25 @@ func NewStateMap(ctx context.Context,
 	return stateMap
 }
 
+func (s *StateMap) Destroy() (bool, error) {
+	cmName := "debugmode-state"
+	_, err := s.configMapInterface.Get(s.ctx, cmName, metav1.GetOptions{})
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			// generic error - not would be ok
+			return false, err
+		}
+		// statemap does not exists
+		return false, nil
+	}
+
+	err = s.configMapInterface.Delete(s.ctx, cmName, metav1.DeleteOptions{})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (s *StateMap) getOrCreateConfigMap() *corev1.ConfigMap {
 	cmName := "debugmode-state"
 	cm, err := s.configMapInterface.Get(s.ctx, cmName, metav1.GetOptions{})

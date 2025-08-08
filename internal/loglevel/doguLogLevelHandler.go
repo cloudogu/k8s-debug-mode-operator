@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	loggingKey = "logging/root"
+	loggingKey              = "logging/root"
+	doguLogLevelHandlerType = "dogu"
 )
 
 type DoguLogLevelHandler struct {
@@ -32,7 +33,12 @@ func NewDoguLogLevelHandler(
 	}
 }
 
-func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, d v2.Dogu) (LogLevel, error) {
+func (r *DoguLogLevelHandler) Kind() string {
+	return doguLogLevelHandlerType
+}
+
+func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, element any) (LogLevel, error) {
+	d := element.(v2.Dogu)
 	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(d.Name))
 	if err != nil {
 		return LevelUnknown, fmt.Errorf("ERROR: Failed to get LogLevel: %w", err)
@@ -41,13 +47,14 @@ func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, d v2.Dogu) (LogLe
 	return r.getLogLevel(ctx, d.Name, doguConfig)
 }
 
-func (r *DoguLogLevelHandler) SetLogLevel(ctx context.Context, name string, logLevel LogLevel) error {
-	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(name))
+func (r *DoguLogLevelHandler) SetLogLevel(ctx context.Context, element any, logLevel LogLevel) error {
+	d := element.(v2.Dogu)
+	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(d.Name))
 	if err != nil {
 		return fmt.Errorf("ERROR: Failed to get LogLevel: %w", err)
 	}
 
-	_, err = r.setLogLevel(ctx, name, doguConfig, logLevel)
+	_, err = r.setLogLevel(ctx, d.Name, doguConfig, logLevel)
 
 	return err
 }
@@ -140,17 +147,17 @@ func (r *DoguLogLevelHandler) writeLogLevel(ctx context.Context, dConfig config.
 }
 
 // RestartDogu restarts the specified dogu.
-func (s *DoguLogLevelHandler) RestartDogu(ctx context.Context, doguName string) error {
+func (s *DoguLogLevelHandler) Restart(ctx context.Context, name string) error {
 	doguRestart := &v2.DoguRestart{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", doguName),
+			GenerateName: fmt.Sprintf("%s-", name),
 		},
 		Spec: v2.DoguRestartSpec{
-			DoguName: doguName,
+			DoguName: name,
 		},
 	}
 	if _, err := s.doguRestartClient.Create(ctx, doguRestart, metav1.CreateOptions{}); err != nil {
-		return fmt.Errorf("failed to restart dogu %s: %w", doguName, err)
+		return fmt.Errorf("failed to restart dogu %s: %w", name, err)
 	}
 	return nil
 }

@@ -6,16 +6,17 @@ require (
 	github.com/cloudogu/ces-commons-lib v0.2.0
 	github.com/cloudogu/cesapp-lib v0.18.1
 	github.com/cloudogu/k8s-component-operator v1.10.0
-	github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20250805104618-a63c1eb57cd7
+	github.com/cloudogu/k8s-debug-mode-cr-lib v0.2.3
 	github.com/cloudogu/k8s-dogu-lib/v2 v2.9.0
 	github.com/cloudogu/k8s-registry-lib v0.5.1
+	github.com/go-logr/logr v1.4.3
 	github.com/sirupsen/logrus v1.9.3
+	go.uber.org/zap v1.27.0
+	k8s.io/api v0.33.2
 	k8s.io/apimachinery v0.33.2 // do not upgrade to 0.33.3 and above until sigs.k8s.io/structured-merge-diff conflict is solved
 	k8s.io/client-go v0.33.2
 	sigs.k8s.io/controller-runtime v0.21.0
 )
-
-require go.uber.org/zap v1.27.0
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -50,7 +51,6 @@ require (
 	github.com/gammazero/toposort v0.1.1 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
@@ -132,7 +132,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.18.3 // indirect
-	k8s.io/api v0.33.2 // indirect
 	k8s.io/apiextensions-apiserver v0.33.2 // indirect
 	k8s.io/apiserver v0.33.2 // indirect
 	k8s.io/cli-runtime v0.33.2 // indirect

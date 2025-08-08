@@ -126,11 +126,12 @@ func createComponentClientSet(k8sManager manager.Manager) (*componentClient.V1Al
 }
 
 func configureManager(ctx context.Context, k8sManager manager.Manager) error {
-
+	logger := logging.FromContext(ctx)
 	namespace, found := os.LookupEnv("NAMESPACE")
 	if !found {
 		namespace = "ecosystem"
 	}
+	logger.Debug(fmt.Sprintf("use namespace %s", namespace))
 
 	k8sClientSet, err := kubernetes.NewForConfig(k8sManager.GetConfig())
 
@@ -170,12 +171,12 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 	componentLogLevelGetter := loglevel.NewComponentLogLevelHandler(ecoClientSet.Components(namespace))
 
 	debugModeReconciler := controller.NewDebugModeReconciler(
-		v1DebugMode,
+		v1DebugMode.DebugMode(namespace),
 		ecoClientSet.Dogus(namespace),
 		ecoClientSet.Components(namespace),
 		ecoClientSet.ConfigMapInterface,
-		*doguLogLevelGetter,
-		*componentLogLevelGetter,
+		doguLogLevelGetter,
+		componentLogLevelGetter,
 	)
 
 	err = debugModeReconciler.SetupWithManager(k8sManager)

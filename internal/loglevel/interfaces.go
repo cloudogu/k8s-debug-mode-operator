@@ -13,9 +13,16 @@ type DoguConfigRepository interface {
 }
 
 type DoguRestarter interface {
-	RestartDogu(ctx context.Context, doguName string) error
+	Restart(ctx context.Context, doguName string) error
 }
 
 type DoguDescriptorGetter interface {
 	GetCurrent(ctx context.Context, simpleDoguName string) (*core.Dogu, error)
+}
+
+type LogLevelHandler interface {
+	GetLogLevel(ctx context.Context, element any) (LogLevel, error)
+	SetLogLevel(ctx context.Context, element any, targetLogLevel LogLevel) error
+	Restart(ctx context.Context, name string) error
+	Kind() string
 }
