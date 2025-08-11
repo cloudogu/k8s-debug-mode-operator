@@ -30,6 +30,7 @@ func (r *DoguGetter) GetCurrent(ctx context.Context, simpleDoguName string) (*co
 	}
 	return get, nil
 }
+
 func (r *DoguGetter) GetCurrentOfAll(ctx context.Context) ([]*core.Dogu, error) {
 	allCurrentDoguVersions, err := r.versionRegistry.GetCurrentOfAll(ctx)
 	if err != nil {

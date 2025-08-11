@@ -31,16 +31,16 @@ type DebugModeReconciler struct {
 	doguInterface            doguInterface
 	componentInterface       componentInterface
 	configMapInterface       configurationMap
-	doguLogLevelHandler      loglevel.LogLevelHandler
-	componentLogLevelHandler loglevel.LogLevelHandler
+	doguLogLevelHandler      LogLevelHandler
+	componentLogLevelHandler LogLevelHandler
 }
 
 func NewDebugModeReconciler(debugModeInterface debugModeInterface,
 	doguInterface doguInterface,
 	componentInterface componentInterface,
 	configMapInterface configurationMap,
-	doguLogLevelHandler loglevel.LogLevelHandler,
-	componentLogLevelHandler loglevel.LogLevelHandler) *DebugModeReconciler {
+	doguLogLevelHandler LogLevelHandler,
+	componentLogLevelHandler LogLevelHandler) *DebugModeReconciler {
 	return &DebugModeReconciler{
 		debugModeInterface:       debugModeInterface,
 		doguInterface:            doguInterface,
@@ -59,12 +59,12 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	logger := logging.FromContext(ctx)
 
 	defer func() {
-		logger.Info(fmt.Sprintf("Finished Reconcile %v : %w", res, err))
+		logger.Info(fmt.Sprintf("Finished Reconcile %v : %v", res, err))
 	}()
 
 	cr, err := r.debugModeInterface.Get(ctx, req.Name, metav1.GetOptions{})
 	if err != nil {
-		logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %w", req.Name, err))
+		logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %v", req.Name, err))
 		return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
 	}
 	logger.Info(fmt.Sprintf("Starting Reconcile for DebugMode: %v", cr))
@@ -80,11 +80,12 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if err != nil {
-		cr, err = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
-		if err != nil {
-			return ctrl.Result{}, err
+		var updateerror error
+		cr, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
+		if updateerror != nil {
+			return ctrl.Result{}, updateerror
 		}
-		logger.Error(fmt.Sprintf("Reconciling failed: %w", err))
+		logger.Error(fmt.Sprintf("Reconciling failed: %v", err))
 		return ctrl.Result{}, err
 	}
 	return result, nil
@@ -240,7 +241,7 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 	logger.Info(fmt.Sprintf("Loglevel for %s '%s' - current:%s - cr-state: %s", handler.Kind(), name, logLevel, current))
 
 	if current == "" {
-		return false, fmt.Errorf("ERROR: no stored fallback loglevel for %s: %w", name)
+		return false, fmt.Errorf("ERROR: no stored fallback loglevel for %s", name)
 	}
 
 	storedLevel, err := loglevel.CreateLogLevelFromString(current)
@@ -251,12 +252,12 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 	// current log level does not match stored level
 	if !strings.EqualFold(logLevel.String(), storedLevel.String()) {
 		logger.Info(fmt.Sprintf("Change loglevel for '%s': from %s to %s", name, logLevel, storedLevel))
-		e = r.doguLogLevelHandler.SetLogLevel(ctx, element, storedLevel)
+		e = handler.SetLogLevel(ctx, element, storedLevel)
 		if e != nil {
 			return false, fmt.Errorf("ERROR: failed to set log level %s for %s: %s :%w", storedLevel.String(), handler.Kind(), name, e)
 		}
 
-		e = r.doguLogLevelHandler.Restart(ctx, name)
+		e = handler.Restart(ctx, name)
 		if e != nil {
 			return false, fmt.Errorf("ERROR: failed to restart %s: %s :%w", handler.Kind(), name, e)
 		}
@@ -267,7 +268,7 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 
 func (r *DebugModeReconciler) isActive(debugCR *k8sCRLib.DebugMode) bool {
 	after := debugCR.Spec.DeactivateTimestamp.After(time.Now())
-	defLogger.Info(fmt.Sprintf("Check if active: %s: %b", debugCR.Spec.DeactivateTimestamp, after))
+	defLogger.Info(fmt.Sprintf("Check if active: %s: %t", debugCR.Spec.DeactivateTimestamp, after))
 	return after
 }
 
@@ -316,7 +317,7 @@ func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, a
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *DebugModeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *DebugModeReconciler) SetupWithManager(mgr controllerManager) error {
 	controllerOptions := mgr.GetControllerOptions()
 	options := controller.TypedOptions[reconcile.Request]{
 		SkipNameValidation: controllerOptions.SkipNameValidation,

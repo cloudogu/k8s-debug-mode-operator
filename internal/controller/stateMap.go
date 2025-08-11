@@ -8,21 +8,20 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	typev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"strings"
 )
 
 type StateMap struct {
 	ctx                context.Context
 	debugCR            *k8sCRLib.DebugMode
-	configMapInterface typev1.ConfigMapInterface
+	configMapInterface configurationMap
 	logger             logging.Logger
 	configMap          *corev1.ConfigMap
 }
 
 func NewStateMap(ctx context.Context,
 	debugCR *k8sCRLib.DebugMode,
-	configMapInterface typev1.ConfigMapInterface,
+	configMapInterface configurationMap,
 ) *StateMap {
 	stateMap := &StateMap{
 		ctx:                ctx,
@@ -73,7 +72,7 @@ func (s *StateMap) getOrCreateConfigMap() *corev1.ConfigMap {
 		}
 
 		if cm, err = s.configMapInterface.Create(s.ctx, cm, metav1.CreateOptions{}); err != nil {
-			s.logger.Error(fmt.Sprintf("ERROR: failed to create configMap: %w", err))
+			s.logger.Error(fmt.Sprintf("ERROR: failed to create configMap: %v", err))
 			return nil
 		}
 	}
@@ -101,7 +100,7 @@ func (s *StateMap) updateStateMap(key string, value string) error {
 	s.logger.Debug(fmt.Sprintf("- start update"))
 	newMap, err := s.configMapInterface.Update(s.ctx, s.configMap, metav1.UpdateOptions{})
 	if err != nil {
-		s.logger.Error(fmt.Sprintf("Failed to Update configMap: %w", err))
+		s.logger.Error(fmt.Sprintf("Failed to Update configMap: %v", err))
 	}
 	s.logger.Debug(fmt.Sprintf("- updated map %s:%s to %v", key, value, newMap))
 	s.configMap = newMap
