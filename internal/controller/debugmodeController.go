@@ -81,7 +81,7 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if err != nil {
 		var updateerror error
-		cr, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
+		_, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
 		if updateerror != nil {
 			return ctrl.Result{}, updateerror
 		}
@@ -151,7 +151,7 @@ func (r *DebugModeReconciler) activateDebugModeForElement(ctx context.Context, h
 	// this is the first time this dogu is checked -> store current level in configMap
 	if current == "" {
 		logger.Info(fmt.Sprintf("Update state map for %s '%s': %s", handler.Kind(), name, logLevel))
-		e = stateMap.updateStateMap(key, logLevel.String())
+		e = stateMap.updateStateMap(ctx, key, logLevel.String())
 		if e != nil {
 			return false, fmt.Errorf("ERROR: failed to update configmap for %s with level: %s :%w", key, logLevel.String(), e)
 		}
@@ -207,12 +207,12 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 	}
 
 	// the current statemap stores the values of this debugmode - if the debug mode is deactivated, the statemap is no longer needed
-	destroy, err := stateMap.Destroy()
+	destroy, err := stateMap.Destroy(ctx)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("ERROR failed to delete configmap: %w", err)
 	}
 	if destroy {
-		logger.Debug(fmt.Sprintf("StateMap deleted"))
+		logger.Debug("StateMap deleted")
 	}
 
 	logger.Info(fmt.Sprintf("Done unsetting debug mode - reconcile at %s", cr.Spec.DeactivateTimestamp))
@@ -220,7 +220,7 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusCompleted, err)
 	}
-	cr, err = r.debugModeInterface.UpdateStatusCompleted(ctx, cr)
+	_, err = r.debugModeInterface.UpdateStatusCompleted(ctx, cr)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusCompleted, err)
 	}

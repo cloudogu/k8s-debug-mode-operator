@@ -117,13 +117,12 @@ func Test_StateMap_Destroy(t *testing.T) {
 		configMapInterface := newMockConfigurationMap(t)
 		configMapInterface.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, nil)
 		statMap := StateMap{
-			ctx:                ctx,
 			configMapInterface: configMapInterface,
 		}
 		configMapInterface.EXPECT().Delete(ctx, "debugmode-state", metav1.DeleteOptions{}).Return(nil)
 
 		// when
-		del, err := statMap.Destroy()
+		del, err := statMap.Destroy(ctx)
 
 		// then
 		assert.True(t, del)
@@ -135,12 +134,11 @@ func Test_StateMap_Destroy(t *testing.T) {
 		configMapInterface := newMockConfigurationMap(t)
 		configMapInterface.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, assert.AnError)
 		statMap := StateMap{
-			ctx:                ctx,
 			configMapInterface: configMapInterface,
 		}
 
 		// when
-		del, err := statMap.Destroy()
+		del, err := statMap.Destroy(ctx)
 
 		// then
 		assert.False(t, del)
@@ -153,12 +151,11 @@ func Test_StateMap_Destroy(t *testing.T) {
 		notFoundErr := errors.NewNotFound(schema.GroupResource{}, "CM")
 		configMapInterface.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, notFoundErr)
 		statMap := StateMap{
-			ctx:                ctx,
 			configMapInterface: configMapInterface,
 		}
 
 		// when
-		del, err := statMap.Destroy()
+		del, err := statMap.Destroy(ctx)
 
 		// then
 		assert.False(t, del)
@@ -170,13 +167,12 @@ func Test_StateMap_Destroy(t *testing.T) {
 		configMapInterface := newMockConfigurationMap(t)
 		configMapInterface.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, nil)
 		statMap := StateMap{
-			ctx:                ctx,
 			configMapInterface: configMapInterface,
 		}
 		configMapInterface.EXPECT().Delete(ctx, "debugmode-state", metav1.DeleteOptions{}).Return(assert.AnError)
 
 		// when
-		del, err := statMap.Destroy()
+		del, err := statMap.Destroy(ctx)
 
 		// then
 		assert.False(t, del)
@@ -236,7 +232,7 @@ func Test_StateMap_updateStateMap(t *testing.T) {
 			})
 
 		// when
-		err := stateMap.updateStateMap("dogu.key1", "warn")
+		err := stateMap.updateStateMap(ctx, "dogu.key1", "warn")
 
 		// then
 		assert.NoError(t, err)
@@ -256,7 +252,7 @@ func Test_StateMap_updateStateMap(t *testing.T) {
 			})
 
 		// when
-		err := stateMap.updateStateMap("dogu.key1", "warn")
+		err := stateMap.updateStateMap(ctx, "dogu.key1", "warn")
 
 		// then
 		assert.NoError(t, err)
@@ -276,7 +272,7 @@ func Test_StateMap_updateStateMap(t *testing.T) {
 			})
 
 		// when
-		err := stateMap.updateStateMap("dogu.key1", "warn")
+		err := stateMap.updateStateMap(ctx, "dogu.key1", "warn")
 
 		// then
 		assert.Error(t, err)

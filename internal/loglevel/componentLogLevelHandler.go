@@ -2,6 +2,7 @@ package loglevel
 
 import (
 	"context"
+	"fmt"
 	v1 "github.com/cloudogu/k8s-component-operator/pkg/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
@@ -29,7 +30,11 @@ func (r *ComponentLogLevelHandler) Kind() string {
 
 func (r *ComponentLogLevelHandler) GetLogLevel(ctx context.Context, element any) (LogLevel, error) {
 	loglevel := defaultMainLogLevel
-	component := element.(v1.Component)
+	component, ok := element.(v1.Component)
+	if !ok {
+		// Typ passt nicht
+		return LevelUnknown, fmt.Errorf("unexpected type of element: %v", element)
+	}
 	if component.Spec.MappedValues != nil {
 		val, ok := component.Spec.MappedValues[mappedLogLevelKey]
 		// If the key exists
@@ -41,7 +46,11 @@ func (r *ComponentLogLevelHandler) GetLogLevel(ctx context.Context, element any)
 }
 
 func (r *ComponentLogLevelHandler) SetLogLevel(ctx context.Context, element any, targetLogLevel LogLevel) error {
-	component := element.(v1.Component)
+	component, ok := element.(v1.Component)
+	if !ok {
+		// Typ passt nicht
+		return fmt.Errorf("unexpected type of element: %v", element)
+	}
 	if component.Spec.MappedValues == nil {
 		component.Spec.MappedValues = map[string]string{}
 	}

@@ -37,7 +37,11 @@ func (r *DoguLogLevelHandler) Kind() string {
 }
 
 func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, element any) (LogLevel, error) {
-	d := element.(v2.Dogu)
+	d, ok := element.(v2.Dogu)
+	if !ok {
+		// Typ passt nicht
+		return LevelUnknown, fmt.Errorf("unexpected type of element: %v", element)
+	}
 	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(d.Name))
 	if err != nil {
 		return LevelUnknown, fmt.Errorf("ERROR: Failed to get LogLevel: %w", err)
@@ -47,7 +51,11 @@ func (r *DoguLogLevelHandler) GetLogLevel(ctx context.Context, element any) (Log
 }
 
 func (r *DoguLogLevelHandler) SetLogLevel(ctx context.Context, element any, logLevel LogLevel) error {
-	d := element.(v2.Dogu)
+	d, ok := element.(v2.Dogu)
+	if !ok {
+		// Typ passt nicht
+		return fmt.Errorf("unexpected type of element: %v", element)
+	}
 	doguConfig, err := r.doguConfigRepository.Get(ctx, dogu.SimpleName(d.Name))
 	if err != nil {
 		return fmt.Errorf("ERROR: Failed to get LogLevel: %w", err)
