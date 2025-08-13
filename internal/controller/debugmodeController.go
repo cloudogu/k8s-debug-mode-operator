@@ -183,7 +183,7 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusRollback, err)
 	}
 
-	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback))
+	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback))
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusRollback, err)
 	}

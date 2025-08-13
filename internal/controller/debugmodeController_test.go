@@ -2184,10 +2184,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -2336,10 +2336,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -2567,10 +2567,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, assert.AnError)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, assert.AnError)
 
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
@@ -2653,10 +2653,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
@@ -2740,10 +2740,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -2848,10 +2848,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -2958,10 +2958,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3069,10 +3069,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3180,10 +3180,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3294,10 +3294,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3410,10 +3410,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3555,10 +3555,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3715,10 +3715,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		// - iterate dogu list
 
@@ -3924,10 +3924,10 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 				ObservedGeneration: 0,
 				LastTransitionTime: metav1.Time{},
 				Reason:             string(k8sCRLib.DebugModeStatusRollback),
-				Message:            "Deactivating Debug-Mode in progres",
+				Message:            "Deactivating Debug-Mode in progress",
 			},
 		}
-		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progres", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
 
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
