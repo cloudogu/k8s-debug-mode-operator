@@ -319,7 +319,7 @@ func (r *DebugModeReconciler) iterateComponentsForDebugMode(ctx context.Context,
 	// components
 	componentList, err := r.componentInterface.List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return false, fmt.Errorf("ERROR: Failed to list dogus: %w", err)
+		return false, fmt.Errorf("ERROR: Failed to list components: %w", err)
 	}
 	if componentList != nil && len(componentList.Items) > 0 {
 		componentChange := false
