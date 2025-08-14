@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/cloudogu/ces-commons-lib/dogu"
 	"github.com/cloudogu/cesapp-lib/core"
+	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
+	doguClient "github.com/cloudogu/k8s-dogu-lib/v2/client"
 	"github.com/cloudogu/k8s-registry-lib/config"
 )
 
@@ -13,9 +15,24 @@ type DoguConfigRepository interface {
 }
 
 type DoguRestarter interface {
-	RestartDogu(ctx context.Context, doguName string) error
+	Restart(ctx context.Context, doguName string) error
 }
 
 type DoguDescriptorGetter interface {
 	GetCurrent(ctx context.Context, simpleDoguName string) (*core.Dogu, error)
+}
+
+type LogLevelHandler interface {
+	GetLogLevel(ctx context.Context, element any) (LogLevel, error)
+	SetLogLevel(ctx context.Context, element any, targetLogLevel LogLevel) error
+	Restart(ctx context.Context, name string) error
+	Kind() string
+}
+
+type ComponentInterface interface {
+	componentClient.ComponentInterface
+}
+
+type DoguRestartInterface interface {
+	doguClient.DoguRestartInterface
 }

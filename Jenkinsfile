@@ -56,15 +56,14 @@ node('docker') {
                                 make 'build-controller'
                             }
 
-// FIXME: re-enable when tests added
-//                             stage("Unit test") {
-//                                 make 'unit-test'
-//                                 junit allowEmptyResults: true, testResults: 'target/unit-tests/*-tests.xml'
-//                             }
-//
-//                             stage('k8s-Integration-Test') {
-//                                 make 'k8s-integration-test'
-//                             }
+                            stage("Unit test") {
+                                make 'unit-test'
+                                junit allowEmptyResults: true, testResults: 'target/unit-tests/*-tests.xml'
+                            }
+
+                            stage('k8s-Integration-Test') {
+                                make 'k8s-integration-test'
+                            }
 
                             stage("Review dog analysis") {
                                 stageStaticAnalysisReviewDog()

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// LogLevel is the log level that can be defined for a dogu.
+// LogLevel is the log level that can be defined for a dogu or component.
 type LogLevel int
 
 const (
