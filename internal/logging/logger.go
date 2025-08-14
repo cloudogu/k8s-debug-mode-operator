@@ -1,12 +1,37 @@
 package logging
 
 import (
+	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	uberzap "go.uber.org/zap"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
+
+type Logger struct {
+	logger logr.Logger
+}
+
+func FromContext(ctx context.Context) Logger {
+	return Logger{
+		logger: logf.FromContext(ctx),
+	}
+}
+
+func (l Logger) Info(msg string, keysAndValues ...any) {
+	l.logger.Info(msg, keysAndValues...)
+}
+
+func (l Logger) Error(msg string, keysAndValues ...any) {
+	l.logger.V(2).GetSink().Info(-2, msg, keysAndValues...)
+}
+
+func (l Logger) Debug(msg string, keysAndValues ...any) {
+	l.logger.V(-1).GetSink().Info(1, msg, keysAndValues...)
+}
 
 func ConfigureLogger() {
 	zapOpts := getZapOptions()

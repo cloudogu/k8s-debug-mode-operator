@@ -126,6 +126,12 @@ func createComponentClientSet(k8sManager manager.Manager) (*componentClient.V1Al
 }
 
 func configureManager(ctx context.Context, k8sManager manager.Manager) error {
+	logger := logging.FromContext(ctx)
+	namespace, found := os.LookupEnv("NAMESPACE")
+	if !found {
+		namespace = "ecosystem"
+	}
+	logger.Debug(fmt.Sprintf("use namespace %s", namespace))
 
 	k8sClientSet, err := kubernetes.NewForConfig(k8sManager.GetConfig())
 
@@ -144,7 +150,7 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 		return fmt.Errorf("ERROR: failed to create component client set: %w", err)
 	}
 
-	configMapClient := k8sClientSet.CoreV1().ConfigMaps("ecosystem")
+	configMapClient := k8sClientSet.CoreV1().ConfigMaps(namespace)
 
 	ecoClientSet := ecosystemClientSet{
 		k8sClientSet,
@@ -161,14 +167,16 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 		dogu.NewLocalDoguDescriptorRepository(configMapClient),
 	)
 
-	doguLogLevelGetter := loglevel.NewDoguLogLevelGetter(doguConfig, doguDescriptorGetter)
-	componentLogLevelGetter := loglevel.NewComponentLogLevelGetter()
+	doguLogLevelGetter := loglevel.NewDoguLogLevelHandler(doguConfig, doguDescriptorGetter, ecoClientSet.DoguRestarts(namespace))
+	componentLogLevelGetter := loglevel.NewComponentLogLevelHandler(ecoClientSet.Components(namespace))
 
 	debugModeReconciler := controller.NewDebugModeReconciler(
-		v1DebugMode, ecoClientSet.Dogus("ecosystem"),
-		ecoClientSet.Components("ecosystem"),
-		*doguLogLevelGetter,
-		*componentLogLevelGetter,
+		v1DebugMode.DebugMode(namespace),
+		ecoClientSet.Dogus(namespace),
+		ecoClientSet.Components(namespace),
+		ecoClientSet.ConfigMapInterface,
+		doguLogLevelGetter,
+		componentLogLevelGetter,
 	)
 
 	err = debugModeReconciler.SetupWithManager(k8sManager)
@@ -186,6 +194,10 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 }
 
 func getK8sManagerOptions() manager.Options {
+	namespace, found := os.LookupEnv("NAMESPACE")
+	if !found {
+		namespace = "ecosystem"
+	}
 	options := ctrl.Options{
 		Scheme:  scheme,
 		Metrics: server.Options{BindAddress: metricsAddr},
@@ -193,7 +205,7 @@ func getK8sManagerOptions() manager.Options {
 			// Restrict namespace for components only as we want to reconcile Deployments,
 			// StatefulSets and DaemonSets across all namespaces.
 			&k8scloudogucomv1.DebugMode{}: {Namespaces: map[string]cache.Config{
-				"ecosystem": {},
+				namespace: {},
 			}},
 		}},
 		HealthProbeBindAddress: probeAddr,
