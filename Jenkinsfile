@@ -80,10 +80,9 @@ node('docker') {
                             }
                         }
 
-// FIXME: re-enable when tests added
-//         stage('SonarQube') {
-//             stageStaticAnalysisSonarQube()
-//         }
+        stage('SonarQube') {
+            stageStaticAnalysisSonarQube()
+        }
 
 
         K3d k3d = new K3d(this, "${WORKSPACE}", "${WORKSPACE}/k3d", env.PATH)
