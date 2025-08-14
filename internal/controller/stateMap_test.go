@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
-	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -195,19 +194,10 @@ func Test_StateMap_compareWithStateMap(t *testing.T) {
 		stateMap := NewStateMap(ctx, cr, configMapInterface)
 
 		//when
-		current, equals := stateMap.compareWithStateMap("dogu.keyNotFound", loglevel.LevelWarn.String())
-		assert.False(t, equals)
+		current := stateMap.getValueFromMap("dogu.keyNotFound")
 		assert.Equal(t, "", current)
 
-		current, equals = stateMap.compareWithStateMap("dogu.keyInfo", "info")
-		assert.True(t, equals)
-		assert.Equal(t, "info", current)
-		current, equals = stateMap.compareWithStateMap("dogu.keyInfo", "INFO")
-		assert.True(t, equals)
-		assert.Equal(t, "info", current)
-
-		current, equals = stateMap.compareWithStateMap("dogu.keyInfo", "WARN")
-		assert.False(t, equals)
+		current = stateMap.getValueFromMap("dogu.keyInfo")
 		assert.Equal(t, "info", current)
 	})
 }

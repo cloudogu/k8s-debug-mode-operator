@@ -144,7 +144,7 @@ func (r *DebugModeReconciler) activateDebugModeForElement(ctx context.Context, h
 		return false, fmt.Errorf("ERROR: Failed to get LogLevel for %s %s: %w", handler.Kind(), name, e)
 	}
 
-	current, _ := stateMap.compareWithStateMap(key, targetLogLevel.String())
+	current := stateMap.getValueFromMap(key)
 
 	logger.Info(fmt.Sprintf("Loglevel for %s '%s' - current:%s - cr-state: %s", handler.Kind(), name, logLevel, current))
 
@@ -229,14 +229,14 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 	return ctrl.Result{}, nil
 }
 
-func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context, handler loglevel.LogLevelHandler, name string, element any, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
+func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context, handler loglevel.LogLevelHandler, name string, element any, stateMap *StateMap, logger logging.Logger) (bool, error) {
 	key := fmt.Sprintf("%s.%s", handler.Kind(), name)
 	logLevel, e := handler.GetLogLevel(ctx, element)
 	if e != nil {
 		return false, fmt.Errorf("ERROR: Failed to get LogLevel for %s %s: %w", handler.Kind(), name, e)
 	}
 
-	current, _ := stateMap.compareWithStateMap(key, targetLogLevel.String())
+	current := stateMap.getValueFromMap(key)
 
 	logger.Info(fmt.Sprintf("Loglevel for %s '%s' - current:%s - cr-state: %s", handler.Kind(), name, logLevel, current))
 
@@ -284,7 +284,7 @@ func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, a
 			if activate {
 				change, err = r.activateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, targetLogLevel, logger)
 			} else {
-				change, err = r.deactivateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, targetLogLevel, logger)
+				change, err = r.deactivateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, logger)
 			}
 			if err != nil {
 				return false, err
@@ -306,7 +306,7 @@ func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, a
 			if activate {
 				change, err = r.activateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, targetLogLevel, logger)
 			} else {
-				change, err = r.deactivateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, targetLogLevel, logger)
+				change, err = r.deactivateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, logger)
 			}
 			if err != nil {
 				return false, err

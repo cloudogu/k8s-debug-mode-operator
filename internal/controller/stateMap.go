@@ -8,7 +8,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
 )
 
 type StateMap struct {
@@ -78,12 +77,12 @@ func (s *StateMap) getOrCreateConfigMap(ctx context.Context) *corev1.ConfigMap {
 	return cm
 }
 
-func (s *StateMap) compareWithStateMap(key string, target string) (string, bool) {
+func (s *StateMap) getValueFromMap(key string) string {
 	val, ok := s.configMap.Data[key]
 	if !ok {
-		return "", false
+		return ""
 	}
-	return val, strings.EqualFold(val, target)
+	return val
 }
 
 func (s *StateMap) updateStateMap(ctx context.Context, key string, value string) error {
