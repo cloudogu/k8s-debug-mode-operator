@@ -19,6 +19,8 @@ import (
 
 const (
 	reconcilerTimeoutInSec = 60
+	phaseErrorString       = "ERROR failed to set phase %s: %w"
+	conditionErrorString   = "ERROR failed to set condition %s: %w"
 )
 
 var (
@@ -97,12 +99,12 @@ func (r *DebugModeReconciler) activateDebugMode(ctx context.Context, cr *k8sCRLi
 
 	cr, err := r.debugModeInterface.UpdateStatusDebugModeSet(ctx, cr)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusSet, err)
+		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusSet, err)
 	}
 
 	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Activating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusSet))
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusSet, err)
+		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusSet, err)
 	}
 
 	change := false
@@ -126,11 +128,11 @@ func (r *DebugModeReconciler) activateDebugMode(ctx context.Context, cr *k8sCRLi
 
 	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, true, "Debug-Mode set for all dogus and components", string(k8sCRLib.DebugModeStatusSet))
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusSet, err)
+		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusSet, err)
 	}
 	cr, err = r.debugModeInterface.UpdateStatusWaitForRollback(ctx, cr)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusWaitForRollback, err)
+		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusWaitForRollback, err)
 	}
 
 	// there were no log level changes, so we wait for the debugMode to end
@@ -180,12 +182,12 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 
 	cr, err := r.debugModeInterface.UpdateStatusRollback(ctx, cr)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusRollback, err)
+		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusRollback, err)
 	}
 
 	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback))
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusRollback, err)
+		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusRollback, err)
 	}
 
 	targetLevel, err := loglevel.CreateLogLevelFromString(cr.Spec.TargetLogLevel)
@@ -218,11 +220,11 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 	logger.Info(fmt.Sprintf("Done unsetting debug mode - reconcile at %s", cr.Spec.DeactivateTimestamp))
 	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Debug-Mode deactivated", string(k8sCRLib.DebugModeStatusCompleted))
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set condition %s: %w", k8sCRLib.DebugModeStatusCompleted, err)
+		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusCompleted, err)
 	}
 	_, err = r.debugModeInterface.UpdateStatusCompleted(ctx, cr)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR failed to set phase %s: %w", k8sCRLib.DebugModeStatusCompleted, err)
+		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusCompleted, err)
 	}
 
 	// there were no log level changes, so we wait for the debugMode to end
@@ -273,6 +275,21 @@ func (r *DebugModeReconciler) isActive(debugCR *k8sCRLib.DebugMode) bool {
 }
 
 func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
+	doguChange, err := r.iterateDogusForDebugMode(ctx, activate, stateMap, targetLogLevel, logger)
+	if err != nil {
+		return doguChange, fmt.Errorf("ERROR failed to iterate dogus: %w", err)
+	}
+
+	componentChange, err := r.iterateComponentsForDebugMode(ctx, activate, stateMap, targetLogLevel, logger)
+	if err != nil {
+		// return doguChange or componentChange so that we don't miss changes when there's none in components
+		return doguChange || componentChange, fmt.Errorf("ERROR failed to iterate components: %w", err)
+	}
+
+	return doguChange || componentChange, nil
+}
+
+func (r *DebugModeReconciler) iterateDogusForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
 	change := false
 	// Dogus
 	doguList, err := r.doguInterface.List(ctx, metav1.ListOptions{})
@@ -280,39 +297,49 @@ func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, a
 		return false, fmt.Errorf("ERROR: Failed to list dogus: %w", err)
 	}
 	if doguList != nil && len(doguList.Items) > 0 {
+		doguChange := false
 		for _, dogu := range doguList.Items {
 			if activate {
-				change, err = r.activateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, targetLogLevel, logger)
+				doguChange, err = r.activateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, targetLogLevel, logger)
 			} else {
-				change, err = r.deactivateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, logger)
+				doguChange, err = r.deactivateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, logger)
 			}
+			change = change || doguChange
 			if err != nil {
 				return false, err
 			}
 		}
 	}
 
+	return change, nil
+}
+
+func (r *DebugModeReconciler) iterateComponentsForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
+	change := false
 	// components
 	componentList, err := r.componentInterface.List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return false, fmt.Errorf("ERROR: Failed to list dogus: %w", err)
 	}
 	if componentList != nil && len(componentList.Items) > 0 {
+		componentChange := false
 		for _, component := range componentList.Items {
 			// skip self
 			if component.Name == "k8s-debug-mode-operator" {
 				continue
 			}
 			if activate {
-				change, err = r.activateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, targetLogLevel, logger)
+				componentChange, err = r.activateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, targetLogLevel, logger)
 			} else {
-				change, err = r.deactivateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, logger)
+				componentChange, err = r.deactivateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, logger)
 			}
+			change = change || componentChange
 			if err != nil {
 				return false, err
 			}
 		}
 	}
+
 	return change, nil
 }
 
