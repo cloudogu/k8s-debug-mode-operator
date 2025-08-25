@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/controller"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
@@ -49,7 +48,6 @@ type ecosystemClientSet struct {
 	kubernetes.Interface
 	k8scloudogucomclient.DebugModeEcosystemInterface
 	doguClient.EcoSystemV2Client
-	componentClient.V1Alpha1Client
 	corev1.ConfigMapInterface
 }
 
@@ -116,15 +114,6 @@ func createDoguClientSet(k8sManager manager.Manager) (*doguClient.EcoSystemV2Cli
 	return doguClientSet, nil
 }
 
-func createComponentClientSet(k8sManager manager.Manager) (*componentClient.V1Alpha1Client, error) {
-	componentClientSet, err := componentClient.NewForConfig(k8sManager.GetConfig())
-	if err != nil {
-		return nil, fmt.Errorf("failed to create ecosystem client set: %w", err)
-	}
-
-	return componentClientSet, nil
-}
-
 func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 	logger := logging.FromContext(ctx)
 	namespace, found := os.LookupEnv("NAMESPACE")
@@ -145,18 +134,12 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 		return fmt.Errorf("ERROR: failed to create dogu client set: %w", err)
 	}
 
-	componentClientSet, err := createComponentClientSet(k8sManager)
-	if err != nil {
-		return fmt.Errorf("ERROR: failed to create component client set: %w", err)
-	}
-
 	configMapClient := k8sClientSet.CoreV1().ConfigMaps(namespace)
 
 	ecoClientSet := ecosystemClientSet{
 		k8sClientSet,
 		debugModeClientSet,
 		*doguClientSet,
-		*componentClientSet,
 		configMapClient,
 	}
 
@@ -168,15 +151,12 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 	)
 
 	doguLogLevelGetter := loglevel.NewDoguLogLevelHandler(doguConfig, doguDescriptorGetter, ecoClientSet.DoguRestarts(namespace))
-	componentLogLevelGetter := loglevel.NewComponentLogLevelHandler(ecoClientSet.Components(namespace))
 
 	debugModeReconciler := controller.NewDebugModeReconciler(
 		v1DebugMode.DebugMode(namespace),
 		ecoClientSet.Dogus(namespace),
-		ecoClientSet.Components(namespace),
 		ecoClientSet.ConfigMapInterface,
 		doguLogLevelGetter,
-		componentLogLevelGetter,
 	)
 
 	err = debugModeReconciler.SetupWithManager(k8sManager)
