@@ -30,11 +30,11 @@ spec:
         name: manager
         env:
         - name: STAGE
-          value: {{ quote .Values.controllerManager.manager.env.stage | default "production" }}
+          value: {{ quote .Values.manager.env.stage | default "production" }}
         - name: LOG_LEVEL
-          value: {{ quote .Values.controllerManager.manager.env.logLevel | default "info"}}
-        image: "{{ .Values.controllerManager.manager.image.registry }}/{{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag }}"
-        imagePullPolicy: {{ .Values.controllerManager.manager.imagePullPolicy }}
+          value: {{ quote .Values.manager.env.logLevel | default "info"}}
+        image: "{{ .Values.manager.image.registry }}/{{ .Values.manager.image.repository }}:{{ .Values.manager.image.tag }}"
+        imagePullPolicy: {{ .Values.manager.imagePullPolicy }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -49,9 +49,9 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-          {{- toYaml .Values.controllerManager.manager.resourceLimits | nindent 14 }}
+          {{- toYaml .Values.manager.resourceLimits | nindent 14 }}
           requests:
-          {{- toYaml .Values.controllerManager.manager.resourceRequests | nindent 14 }}
+          {{- toYaml .Values.manager.resourceRequests | nindent 14 }}
         securityContext:
           allowPrivilegeEscalation: false
       securityContext:

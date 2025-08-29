@@ -1,6 +1,6 @@
 # Set these to the desired values
 ARTIFACT_ID=k8s-debug-mode-operator
-VERSION=0.2.0
+VERSION=0.3.0
 IMAGE=cloudogu/${ARTIFACT_ID}:${VERSION}
 GOTAG=1.24.4
 MAKEFILES_VERSION=10.2.0
@@ -44,32 +44,32 @@ helm-repo-config: ## Creates a configMap and a secret for the helm repo connecti
 template-stage: $(BINARY_YQ)
 	@if [[ ${STAGE} == "development" ]]; then \
   		echo "Setting STAGE env in deployment to ${STAGE}!" ;\
-		$(BINARY_YQ) -i e ".controllerManager.env.stage=\"${STAGE}\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
+		$(BINARY_YQ) -i e ".env.stage=\"${STAGE}\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
 	fi
 
 .PHONY: template-log-level
 template-log-level: $(BINARY_YQ)
 	@echo "Setting LOG_LEVEL env in deployment to ${LOG_LEVEL}!"
-	@$(BINARY_YQ) -i e ".controllerManager.env.logLevel=\"${LOG_LEVEL}\"" ${K8S_COMPONENT_TARGET_VALUES}
+	@$(BINARY_YQ) -i e ".env.logLevel=\"${LOG_LEVEL}\"" ${K8S_COMPONENT_TARGET_VALUES}
 
 .PHONY: template-image-pull-policy
 template-image-pull-policy: $(BINARY_YQ)
 	@if [[ ${STAGE} == "development" ]]; then \
   		echo "Setting PULL POLICY to always!" ;\
-		$(BINARY_YQ) -i e ".controllerManager.imagePullPolicy=\"Always\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
+		$(BINARY_YQ) -i e ".imagePullPolicy=\"Always\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
 	fi
 
 .PHONY: helm-values-update-image-version
 helm-values-update-image-version: $(BINARY_YQ)
 	@echo "Updating the image version in source value.yaml to ${VERSION}..."
-	@$(BINARY_YQ) -i e ".controllerManager.manager.image.tag = \"${VERSION}\"" ${K8S_COMPONENT_SOURCE_VALUES}
+	@$(BINARY_YQ) -i e ".manager.image.tag = \"${VERSION}\"" ${K8S_COMPONENT_SOURCE_VALUES}
 
 .PHONY: helm-values-replace-image-repo
 helm-values-replace-image-repo: $(BINARY_YQ)
 	@if [[ ${STAGE} == "development" ]]; then \
       		echo "Setting dev image repo in target value.yaml!" ;\
-    		$(BINARY_YQ) -i e ".controllerManager.manager.image.registry=\"$(shell echo '${IMAGE_DEV}' | sed 's/\([^\/]*\)\/\(.*\)/\1/')\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
-    		$(BINARY_YQ) -i e ".controllerManager.manager.image.repository=\"$(shell echo '${IMAGE_DEV}' | sed 's/\([^\/]*\)\/\(.*\)/\2/')\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
+    		$(BINARY_YQ) -i e ".manager.image.registry=\"$(shell echo '${IMAGE_DEV}' | sed 's/\([^\/]*\)\/\(.*\)/\1/')\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
+    		$(BINARY_YQ) -i e ".manager.image.repository=\"$(shell echo '${IMAGE_DEV}' | sed 's/\([^\/]*\)\/\(.*\)/\2/')\"" ${K8S_COMPONENT_TARGET_VALUES} ;\
     	fi
 
 .PHONY: kill-operator-pod

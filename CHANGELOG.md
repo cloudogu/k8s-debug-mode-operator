@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.0] - 2025-08-29
+### Removed
+- Removed component log level handling
+  - debug-mode should not touch components
+
 ## [v0.2.0] - 2025-08-14
 ### Added
 - Debug-Mode Operator Initial Implementation finished
