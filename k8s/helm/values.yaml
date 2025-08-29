@@ -7,7 +7,7 @@ manager:
   image:
     registry: docker.io
     repository: cloudogu/k8s-debug-mode-operator
-    tag: 0.2.0
+    tag: 0.3.0
   imagePullPolicy: Always
   env:
     logLevel: debug
