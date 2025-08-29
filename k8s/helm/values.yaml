@@ -1,25 +1,25 @@
 global:
   imagePullSecrets:
     - name: "ces-container-registries"
-controllerManager:
-  manager:
-    image:
-      registry: docker.io
-      repository: cloudogu/k8s-debug-mode-operator
-      tag: 0.0.0
-    imagePullPolicy: Always
-    env:
-      logLevel: debug
-      stage: production
-      helmClientTimeoutMins: "15"
-      rollbackReleaseTimeoutMins: "15"
-      healthSyncIntervalMins: "2"
-    resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 64Mi
-    networkPolicies:
-      enabled: true
+  networkPolicies:
+    enabled: true
+manager:
+  image:
+    registry: docker.io
+    repository: cloudogu/k8s-debug-mode-operator
+    tag: 0.2.0
+  imagePullPolicy: Always
+  env:
+    logLevel: debug
+    stage: production
+    helmClientTimeoutMins: "15"
+    rollbackReleaseTimeoutMins: "15"
+    healthSyncIntervalMins: "2"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  replicas: 1
