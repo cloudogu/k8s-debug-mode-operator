@@ -29,27 +29,21 @@ var (
 
 // DebugModeReconciler reconciles a DebugMode object
 type DebugModeReconciler struct {
-	debugModeInterface       debugModeInterface
-	doguInterface            doguInterface
-	componentInterface       componentInterface
-	configMapInterface       configurationMap
-	doguLogLevelHandler      LogLevelHandler
-	componentLogLevelHandler LogLevelHandler
+	debugModeInterface  debugModeInterface
+	doguInterface       doguInterface
+	configMapInterface  configurationMap
+	doguLogLevelHandler LogLevelHandler
 }
 
 func NewDebugModeReconciler(debugModeInterface debugModeInterface,
 	doguInterface doguInterface,
-	componentInterface componentInterface,
 	configMapInterface configurationMap,
-	doguLogLevelHandler LogLevelHandler,
-	componentLogLevelHandler LogLevelHandler) *DebugModeReconciler {
+	doguLogLevelHandler LogLevelHandler) *DebugModeReconciler {
 	return &DebugModeReconciler{
-		debugModeInterface:       debugModeInterface,
-		doguInterface:            doguInterface,
-		componentInterface:       componentInterface,
-		configMapInterface:       configMapInterface,
-		doguLogLevelHandler:      doguLogLevelHandler,
-		componentLogLevelHandler: componentLogLevelHandler,
+		debugModeInterface:  debugModeInterface,
+		doguInterface:       doguInterface,
+		configMapInterface:  configMapInterface,
+		doguLogLevelHandler: doguLogLevelHandler,
 	}
 }
 
@@ -280,13 +274,7 @@ func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, a
 		return doguChange, fmt.Errorf("ERROR failed to iterate dogus: %w", err)
 	}
 
-	componentChange, err := r.iterateComponentsForDebugMode(ctx, activate, stateMap, targetLogLevel, logger)
-	if err != nil {
-		// return doguChange or componentChange so that we don't miss changes when there's none in components
-		return doguChange || componentChange, fmt.Errorf("ERROR failed to iterate components: %w", err)
-	}
-
-	return doguChange || componentChange, nil
+	return doguChange, nil
 }
 
 func (r *DebugModeReconciler) iterateDogusForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
@@ -305,35 +293,6 @@ func (r *DebugModeReconciler) iterateDogusForDebugMode(ctx context.Context, acti
 				doguChange, err = r.deactivateDebugModeForElement(ctx, r.doguLogLevelHandler, dogu.Name, dogu, stateMap, logger)
 			}
 			change = change || doguChange
-			if err != nil {
-				return false, err
-			}
-		}
-	}
-
-	return change, nil
-}
-
-func (r *DebugModeReconciler) iterateComponentsForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
-	change := false
-	// components
-	componentList, err := r.componentInterface.List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return false, fmt.Errorf("ERROR: Failed to list components: %w", err)
-	}
-	if componentList != nil && len(componentList.Items) > 0 {
-		componentChange := false
-		for _, component := range componentList.Items {
-			// skip self
-			if component.Name == "k8s-debug-mode-operator" {
-				continue
-			}
-			if activate {
-				componentChange, err = r.activateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, targetLogLevel, logger)
-			} else {
-				componentChange, err = r.deactivateDebugModeForElement(ctx, r.componentLogLevelHandler, component.Name, component, stateMap, logger)
-			}
-			change = change || componentChange
 			if err != nil {
 				return false, err
 			}

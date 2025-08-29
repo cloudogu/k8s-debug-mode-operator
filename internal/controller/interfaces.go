@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/cloudogu/ces-commons-lib/dogu"
-	componentClient "github.com/cloudogu/k8s-component-operator/pkg/api/ecosystem"
 	libclient "github.com/cloudogu/k8s-debug-mode-cr-lib/pkg/client/v1"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
 	doguClient "github.com/cloudogu/k8s-dogu-lib/v2/client"
@@ -36,10 +35,6 @@ type doguVersionRegistry interface {
 
 type localDoguDescriptorRepository interface {
 	dogu.LocalDoguDescriptorRepository
-}
-
-type componentInterface interface {
-	componentClient.ComponentInterface
 }
 
 type configurationMap interface {
