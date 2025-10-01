@@ -30,7 +30,7 @@ RUN make compile-generic
 FROM gcr.io/distroless/static:nonroot
 LABEL maintainer="hello@cloudogu.com" \
       NAME="k8s-debug-mode-operator" \
-      VERSION="0.3.0"
+      VERSION="1.0.0"
 
 WORKDIR /
 COPY --from=builder /workspace/target/k8s-debug-mode-operator .

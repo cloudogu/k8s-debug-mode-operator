@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.0.0] - 2025-10-01
+### Fixed
+- [#7] image in component-patch-template
+
+### Changed
+- [#7] update component-dependency for k8s-debug-mode-operator-crd to >= v1.0.0
+
 ## [v0.3.0] - 2025-08-29
 ### Removed
 - Removed component log level handling
