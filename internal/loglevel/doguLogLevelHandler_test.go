@@ -1,11 +1,11 @@
 package loglevel
 
 import (
-	"fmt"
+	"testing"
+
 	"github.com/cloudogu/cesapp-lib/core"
 	"github.com/cloudogu/k8s-registry-lib/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 
 	dogulib "github.com/cloudogu/ces-commons-lib/dogu"
 	v2 "github.com/cloudogu/k8s-dogu-lib/v2/api/v2"
@@ -17,12 +17,11 @@ func Test_DoguLogLevelHandler_NewComponentLogLevelHandler(t *testing.T) {
 	t.Run("should create new component log level handler", func(t *testing.T) {
 
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		// then
 		assert.NotEmpty(t, dllh)
@@ -33,12 +32,11 @@ func Test_DoguLogLevelHandler_Kind(t *testing.T) {
 	t.Run("should get component as kind", func(t *testing.T) {
 
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		// then
 		assert.NotEmpty(t, dllh)
@@ -50,7 +48,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	ctx := t.Context()
 	t.Run("success", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -68,7 +65,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -78,7 +75,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	})
 	t.Run("error getting loglevel key from config", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -94,7 +90,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, assert.AnError)
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -104,7 +100,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	})
 	t.Run("success with default loglevel", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -132,7 +127,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 		doguDescriptorGetter.EXPECT().GetCurrent(ctx, dogu.Name).Return(&coreDogu, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -142,7 +137,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	})
 	t.Run("error with default loglevel", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -161,7 +155,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 		doguDescriptorGetter.EXPECT().GetCurrent(ctx, dogu.Name).Return(nil, assert.AnError)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -171,7 +165,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	})
 	t.Run("success without default loglevel", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -199,7 +192,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 		doguDescriptorGetter.EXPECT().GetCurrent(ctx, dogu.Name).Return(&coreDogu, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -209,7 +202,6 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 	})
 	t.Run("success with unknown loglevel", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -227,7 +219,7 @@ func Test_DoguLogLevelHandler_GetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 
 		level, err := dllh.GetLogLevel(ctx, dogu)
 
@@ -241,7 +233,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	ctx := t.Context()
 	t.Run("success", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -269,7 +260,7 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Update(ctx, config.DoguConfig{DoguName: dogucConfig.DoguName, Config: expectedConfig.Config}).Return(dogucConfig, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err = dllh.SetLogLevel(ctx, dogu, LevelWarn)
 
 		assert.NoError(t, err)
@@ -277,7 +268,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	})
 	t.Run("error getting current level", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -305,7 +295,7 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguDescriptorGetter.EXPECT().GetCurrent(ctx, dogu.Name).Return(nil, assert.AnError)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err = dllh.SetLogLevel(ctx, dogu, LevelWarn)
 
 		assert.Error(t, err)
@@ -313,7 +303,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	})
 	t.Run("error getting config", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -331,7 +320,7 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, assert.AnError)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err := dllh.SetLogLevel(ctx, dogu, LevelWarn)
 
 		assert.Error(t, err)
@@ -339,7 +328,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	})
 	t.Run("success no change", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -357,7 +345,7 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err := dllh.SetLogLevel(ctx, dogu, LevelInfo)
 
 		assert.NoError(t, err)
@@ -365,7 +353,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	})
 	t.Run("error setting config key", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -384,7 +371,7 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Get(ctx, dogucConfig.DoguName).Return(dogucConfig, nil)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err := dllh.SetLogLevel(ctx, dogu, LevelWarn)
 
 		assert.Error(t, err)
@@ -392,7 +379,6 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 	})
 	t.Run("error on update", func(t *testing.T) {
 		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
 		doguConfigRepository := NewMockDoguConfigRepository(t)
 		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
 		dogu := v2.Dogu{
@@ -420,68 +406,8 @@ func Test_DoguLogLevelHandler_SetLogLevel(t *testing.T) {
 		doguConfigRepository.EXPECT().Update(ctx, config.DoguConfig{DoguName: dogucConfig.DoguName, Config: expectedConfig.Config}).Return(dogucConfig, assert.AnError)
 
 		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
+		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter)
 		err = dllh.SetLogLevel(ctx, dogu, LevelWarn)
-
-		assert.Error(t, err)
-
-	})
-}
-
-func Test_DoguLogLevelHandler_Restart(t *testing.T) {
-	ctx := t.Context()
-	t.Run("success", func(t *testing.T) {
-		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
-		doguConfigRepository := NewMockDoguConfigRepository(t)
-		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
-		dogu := v2.Dogu{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "mydogu",
-			},
-		}
-		doguRestart := &v2.DoguRestart{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: fmt.Sprintf("%s-", dogu.Name),
-			},
-			Spec: v2.DoguRestartSpec{
-				DoguName: dogu.Name,
-			},
-		}
-
-		doguRestartInterface.EXPECT().Create(ctx, doguRestart, metav1.CreateOptions{}).Return(doguRestart, nil)
-
-		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
-		err := dllh.Restart(ctx, dogu.Name)
-
-		assert.NoError(t, err)
-
-	})
-	t.Run("error", func(t *testing.T) {
-		// given
-		doguRestartInterface := NewMockDoguRestartInterface(t)
-		doguConfigRepository := NewMockDoguConfigRepository(t)
-		doguDescriptorGetter := NewMockDoguDescriptorGetter(t)
-		dogu := v2.Dogu{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "mydogu",
-			},
-		}
-		doguRestart := &v2.DoguRestart{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: fmt.Sprintf("%s-", dogu.Name),
-			},
-			Spec: v2.DoguRestartSpec{
-				DoguName: dogu.Name,
-			},
-		}
-
-		doguRestartInterface.EXPECT().Create(ctx, doguRestart, metav1.CreateOptions{}).Return(doguRestart, assert.AnError)
-
-		// when
-		dllh := NewDoguLogLevelHandler(doguConfigRepository, doguDescriptorGetter, doguRestartInterface)
-		err := dllh.Restart(ctx, dogu.Name)
 
 		assert.Error(t, err)
 
