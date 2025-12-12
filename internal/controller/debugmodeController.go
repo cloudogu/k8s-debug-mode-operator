@@ -61,9 +61,12 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}()
 
 	cr, err := r.debugModeInterface.Get(ctx, req.Name, metav1.GetOptions{})
-	if err != nil && !apierrors.IsNotFound(err) {
-		logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %v", req.Name, err))
-		return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %v", req.Name, err))
+			return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
+		}
+		cr = nil
 	}
 	logger.Info(fmt.Sprintf("Starting Reconcile for DebugMode: %v", cr))
 
