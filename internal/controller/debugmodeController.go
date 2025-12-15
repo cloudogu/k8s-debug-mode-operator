@@ -3,12 +3,13 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
-	"time"
 
 	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
@@ -161,10 +162,6 @@ func (r *DebugModeReconciler) activateDebugModeForElement(ctx context.Context, h
 			return false, fmt.Errorf("ERROR: failed to set log level %s for %s: %s :%w", targetLogLevel.String(), handler.Kind(), name, e)
 		}
 
-		e = handler.Restart(ctx, name)
-		if e != nil {
-			return false, fmt.Errorf("ERROR: failed to restart %s: %s :%w", handler.Kind(), name, e)
-		}
 		return true, nil
 	}
 	return false, nil
@@ -253,10 +250,6 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 			return false, fmt.Errorf("ERROR: failed to set log level %s for %s: %s :%w", storedLevel.String(), handler.Kind(), name, e)
 		}
 
-		e = handler.Restart(ctx, name)
-		if e != nil {
-			return false, fmt.Errorf("ERROR: failed to restart %s: %s :%w", handler.Kind(), name, e)
-		}
 		return true, nil
 	}
 	return false, nil

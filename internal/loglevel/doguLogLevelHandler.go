@@ -3,11 +3,11 @@ package loglevel
 import (
 	"context"
 	"fmt"
+
 	"github.com/cloudogu/ces-commons-lib/dogu"
 	v2 "github.com/cloudogu/k8s-dogu-lib/v2/api/v2"
 	"github.com/cloudogu/k8s-registry-lib/config"
 	"github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -18,17 +18,14 @@ const (
 type DoguLogLevelHandler struct {
 	doguConfigRepository DoguConfigRepository
 	doguDescriptorGetter DoguDescriptorGetter
-	doguRestartClient    DoguRestartInterface
 }
 
 func NewDoguLogLevelHandler(
 	doguConfigRepository DoguConfigRepository,
-	doguDescriptorGetter DoguDescriptorGetter,
-	doguRestartClient DoguRestartInterface) *DoguLogLevelHandler {
+	doguDescriptorGetter DoguDescriptorGetter) *DoguLogLevelHandler {
 	return &DoguLogLevelHandler{
 		doguConfigRepository: doguConfigRepository,
 		doguDescriptorGetter: doguDescriptorGetter,
-		doguRestartClient:    doguRestartClient,
 	}
 }
 
@@ -150,21 +147,5 @@ func (r *DoguLogLevelHandler) writeLogLevel(ctx context.Context, dConfig config.
 		return fmt.Errorf("could not update dogu config for dogu %q: %w", dConfig.DoguName, err)
 	}
 
-	return nil
-}
-
-// RestartDogu restarts the specified dogu.
-func (s *DoguLogLevelHandler) Restart(ctx context.Context, name string) error {
-	doguRestart := &v2.DoguRestart{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", name),
-		},
-		Spec: v2.DoguRestartSpec{
-			DoguName: name,
-		},
-	}
-	if _, err := s.doguRestartClient.Create(ctx, doguRestart, metav1.CreateOptions{}); err != nil {
-		return fmt.Errorf("failed to restart dogu %s: %w", name, err)
-	}
 	return nil
 }
