@@ -123,53 +123,6 @@ func (_c *MockLogLevelHandler_Kind_Call) RunAndReturn(run func() string) *MockLo
 	return _c
 }
 
-// Restart provides a mock function with given fields: ctx, name
-func (_m *MockLogLevelHandler) Restart(ctx context.Context, name string) error {
-	ret := _m.Called(ctx, name)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Restart")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, name)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockLogLevelHandler_Restart_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Restart'
-type MockLogLevelHandler_Restart_Call struct {
-	*mock.Call
-}
-
-// Restart is a helper method to define mock.On call
-//   - ctx context.Context
-//   - name string
-func (_e *MockLogLevelHandler_Expecter) Restart(ctx interface{}, name interface{}) *MockLogLevelHandler_Restart_Call {
-	return &MockLogLevelHandler_Restart_Call{Call: _e.mock.On("Restart", ctx, name)}
-}
-
-func (_c *MockLogLevelHandler_Restart_Call) Run(run func(ctx context.Context, name string)) *MockLogLevelHandler_Restart_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
-	})
-	return _c
-}
-
-func (_c *MockLogLevelHandler_Restart_Call) Return(_a0 error) *MockLogLevelHandler_Restart_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockLogLevelHandler_Restart_Call) RunAndReturn(run func(context.Context, string) error) *MockLogLevelHandler_Restart_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // SetLogLevel provides a mock function with given fields: ctx, element, targetLogLevel
 func (_m *MockLogLevelHandler) SetLogLevel(ctx context.Context, element interface{}, targetLogLevel LogLevel) error {
 	ret := _m.Called(ctx, element, targetLogLevel)

@@ -10,11 +10,28 @@ metadata:
     {{- include "k8s-debug-mode-operator.labels" . | nindent 4 }}
 rules:
   - apiGroups:
-      - '*'
+      - ""
     resources:
-      - '*'
+      - configmaps
+    verbs:
+      - get
+      - list
+      - update
+      - create
+      - delete
+  - apiGroups:
+      - k8s.cloudogu.com
+    resources:
+      - debugmodes
+      - debugmodes/status
     verbs:
       - '*'
+  - apiGroups:
+      - k8s.cloudogu.com
+    resources:
+      - dogus
+    verbs:
+      - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+- [#10] Remove dogu restarts from debug-mode-operator
+  - dogus will be restarted by the dogu-operator
 ### Changed
 - [#9] Deleting the DebugMode-CR will deactivate the Debug-Mode itself
 

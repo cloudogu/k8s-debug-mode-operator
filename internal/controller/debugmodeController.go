@@ -166,10 +166,6 @@ func (r *DebugModeReconciler) activateDebugModeForElement(ctx context.Context, h
 			return false, fmt.Errorf("ERROR: failed to set log level %s for %s: %s :%w", targetLogLevel.String(), handler.Kind(), name, e)
 		}
 
-		e = handler.Restart(ctx, name)
-		if e != nil {
-			return false, fmt.Errorf("ERROR: failed to restart %s: %s :%w", handler.Kind(), name, e)
-		}
 		return true, nil
 	}
 	return false, nil
@@ -263,10 +259,6 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 			return false, fmt.Errorf("ERROR: failed to set log level %s for %s: %s :%w", storedLevel.String(), handler.Kind(), name, e)
 		}
 
-		e = handler.Restart(ctx, name)
-		if e != nil {
-			return false, fmt.Errorf("ERROR: failed to restart %s: %s :%w", handler.Kind(), name, e)
-		}
 		return true, nil
 	}
 	return false, nil
