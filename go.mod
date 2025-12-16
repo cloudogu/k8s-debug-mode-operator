@@ -1,6 +1,6 @@
 module github.com/cloudogu/k8s-debug-mode-operator
 
-go 1.24.4
+go 1.25.1
 
 require (
 	github.com/cloudogu/ces-commons-lib v0.2.0

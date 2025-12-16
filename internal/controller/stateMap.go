@@ -3,12 +3,15 @@ package controller
 import (
 	"context"
 	"fmt"
+
 	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+const DEFAULT_CM_NAME = "debugmode-state"
 
 type StateMap struct {
 	debugCR            *k8sCRLib.DebugMode
@@ -31,7 +34,7 @@ func NewStateMap(ctx context.Context,
 }
 
 func (s *StateMap) Destroy(ctx context.Context) (bool, error) {
-	cmName := "debugmode-state"
+	cmName := DEFAULT_CM_NAME
 	_, err := s.configMapInterface.Get(ctx, cmName, metav1.GetOptions{})
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
@@ -50,11 +53,15 @@ func (s *StateMap) Destroy(ctx context.Context) (bool, error) {
 }
 
 func (s *StateMap) getOrCreateConfigMap(ctx context.Context) *corev1.ConfigMap {
-	cmName := "debugmode-state"
+	cmName := DEFAULT_CM_NAME
 	cm, err := s.configMapInterface.Get(ctx, cmName, metav1.GetOptions{})
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
 			// generic error - not would be ok
+			return nil
+		}
+		if s.debugCR == nil {
+			// do not create state map when CR is deleted - this should lead to an error
 			return nil
 		}
 		cm = &corev1.ConfigMap{

@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/controller"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
@@ -11,7 +13,6 @@ import (
 	"github.com/cloudogu/k8s-registry-lib/repository"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"os"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -150,7 +151,7 @@ func configureManager(ctx context.Context, k8sManager manager.Manager) error {
 		dogu.NewLocalDoguDescriptorRepository(configMapClient),
 	)
 
-	doguLogLevelGetter := loglevel.NewDoguLogLevelHandler(doguConfig, doguDescriptorGetter, ecoClientSet.DoguRestarts(namespace))
+	doguLogLevelGetter := loglevel.NewDoguLogLevelHandler(doguConfig, doguDescriptorGetter)
 
 	debugModeReconciler := controller.NewDebugModeReconciler(
 		v1DebugMode.DebugMode(namespace),

@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.24 AS builder
+FROM golang:1.25 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -30,7 +30,7 @@ RUN make compile-generic
 FROM gcr.io/distroless/static:nonroot
 LABEL maintainer="hello@cloudogu.com" \
       NAME="k8s-debug-mode-operator" \
-      VERSION="1.0.0"
+      VERSION="1.0.1"
 
 WORKDIR /
 COPY --from=builder /workspace/target/k8s-debug-mode-operator .
