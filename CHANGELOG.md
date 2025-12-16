@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - [#10] Remove dogu restarts from debug-mode-operator
   - dogus will be restarted by the dogu-operator
+### Changed
+- [#9] Deleting the DebugMode-CR will deactivate the Debug-Mode itself
 
 ## [v1.0.0] - 2025-10-01
 ### Fixed

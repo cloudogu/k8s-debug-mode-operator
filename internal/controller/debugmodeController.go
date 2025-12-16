@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/logging"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -61,8 +62,11 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	cr, err := r.debugModeInterface.Get(ctx, req.Name, metav1.GetOptions{})
 	if err != nil {
-		logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %v", req.Name, err))
-		return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
+		if !apierrors.IsNotFound(err) {
+			logger.Error(fmt.Sprintf("ERROR: failed to get CR with name %s, %v", req.Name, err))
+			return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
+		}
+		cr = nil
 	}
 	logger.Info(fmt.Sprintf("Starting Reconcile for DebugMode: %v", cr))
 
@@ -170,22 +174,25 @@ func (r *DebugModeReconciler) activateDebugModeForElement(ctx context.Context, h
 func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCRLib.DebugMode, stateMap *StateMap) (ctrl.Result, error) {
 	logger := logging.FromContext(ctx)
 	logger.Info("Deactivate DebugMode")
+	var err error
+	var targetLevel loglevel.LogLevel
+	// if the CR is deleted, the status must not be set
+	if cr != nil {
+		cr, err = r.debugModeInterface.UpdateStatusRollback(ctx, cr)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusRollback, err)
+		}
 
-	cr, err := r.debugModeInterface.UpdateStatusRollback(ctx, cr)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusRollback, err)
+		cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback))
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusRollback, err)
+		}
+
+		targetLevel, err = loglevel.CreateLogLevelFromString(cr.Spec.TargetLogLevel)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("ERROR: invalid target log level %s", cr.Spec.TargetLogLevel)
+		}
 	}
-
-	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback))
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusRollback, err)
-	}
-
-	targetLevel, err := loglevel.CreateLogLevelFromString(cr.Spec.TargetLogLevel)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("ERROR: invalid target log level %s", cr.Spec.TargetLogLevel)
-	}
-
 	change := false
 
 	change, err = r.iterateElementsForDebugMode(ctx, false, stateMap, targetLevel, logger)
@@ -208,16 +215,18 @@ func (r *DebugModeReconciler) deactivateDebugMode(ctx context.Context, cr *k8sCR
 		logger.Debug("StateMap deleted")
 	}
 
-	logger.Info(fmt.Sprintf("Done unsetting debug mode - reconcile at %s", cr.Spec.DeactivateTimestamp))
-	cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Debug-Mode deactivated", string(k8sCRLib.DebugModeStatusCompleted))
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusCompleted, err)
+	// if the CR is deleted, the status must not be set
+	if cr != nil {
+		logger.Info(fmt.Sprintf("Done unsetting debug mode - reconcile at %s", cr.Spec.DeactivateTimestamp))
+		cr, err = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, "Debug-Mode deactivated", string(k8sCRLib.DebugModeStatusCompleted))
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf(conditionErrorString, k8sCRLib.DebugModeStatusCompleted, err)
+		}
+		_, err = r.debugModeInterface.UpdateStatusCompleted(ctx, cr)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusCompleted, err)
+		}
 	}
-	_, err = r.debugModeInterface.UpdateStatusCompleted(ctx, cr)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf(phaseErrorString, k8sCRLib.DebugModeStatusCompleted, err)
-	}
-
 	// there were no log level changes, so we wait for the debugMode to end
 	return ctrl.Result{}, nil
 }
@@ -256,6 +265,13 @@ func (r *DebugModeReconciler) deactivateDebugModeForElement(ctx context.Context,
 }
 
 func (r *DebugModeReconciler) isActive(debugCR *k8sCRLib.DebugMode) bool {
+	if debugCR == nil {
+		defLogger.Info(fmt.Sprintf("CR deleted, active: %t", false))
+		return false
+	}
+	if debugCR.DeletionTimestamp != nil {
+		defLogger.Info(fmt.Sprintf("CR marked for deletion, active: %s: %t", debugCR.DeletionTimestamp, false))
+	}
 	after := debugCR.Spec.DeactivateTimestamp.After(time.Now())
 	defLogger.Info(fmt.Sprintf("Check if active: %s: %t", debugCR.Spec.DeactivateTimestamp, after))
 	return after

@@ -2,13 +2,14 @@ package controller
 
 import (
 	"context"
+	"testing"
+
 	k8sCRLib "github.com/cloudogu/k8s-debug-mode-cr-lib/api/v1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"testing"
 )
 
 func Test_StateMap_New(t *testing.T) {
@@ -101,6 +102,20 @@ func Test_StateMap_New(t *testing.T) {
 
 		//when
 		stateMap := NewStateMap(ctx, cr, configMapInterface)
+
+		//then
+		assert.NotEmpty(t, stateMap)
+		assert.Nil(t, stateMap.configMap)
+	})
+	t.Run("error creating new configmap without cr", func(t *testing.T) {
+		//given
+		cm := &corev1.ConfigMap{}
+		configMapInterface := newMockConfigurationMap(t)
+		err := errors.NewNotFound(schema.GroupResource{}, "CM")
+		configMapInterface.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, err)
+
+		//when
+		stateMap := NewStateMap(ctx, nil, configMapInterface)
 
 		//then
 		assert.NotEmpty(t, stateMap)
