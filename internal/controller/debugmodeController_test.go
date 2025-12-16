@@ -9,8 +9,10 @@ import (
 	v2 "github.com/cloudogu/k8s-dogu-lib/v2/api/v2"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/config"
@@ -113,6 +115,57 @@ func Test_DebugModeReconciler_isActive(t *testing.T) {
 		)
 
 		cr := &k8sCRLib.DebugMode{}
+		// when
+		active := dmc.isActive(cr)
+
+		// then
+		assert.False(t, active)
+
+	})
+	t.Run("success no no cr", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		// when
+		active := dmc.isActive(nil)
+
+		// then
+		assert.False(t, active)
+
+	})
+	t.Run("success inactive with deletionTimestamp", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		deletionTime := metav1.NewTime(time.Now().Add(-5 * time.Minute))
+
+		cr := &k8sCRLib.DebugMode{
+			ObjectMeta: metav1.ObjectMeta{
+				DeletionTimestamp: &deletionTime,
+			},
+		}
 		// when
 		active := dmc.isActive(cr)
 
@@ -1374,6 +1427,92 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 			},
 		}
 		debugModeClient.EXPECT().AddOrUpdateLogLevelsSet(ctx, crWithState1, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).Return(crWithState2, nil)
+
+		// - iterate dogu list
+
+		doguList := &v2.DoguList{
+			Items: []v2.Dogu{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "doguA",
+						Namespace: "ecosystem",
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "doguB",
+						Namespace: "ecosystem",
+					},
+				},
+			},
+		}
+
+		doguClient.EXPECT().List(ctx, metav1.ListOptions{}).Return(doguList, nil)
+
+		// - doguA
+		doguLevelHandler.EXPECT().GetLogLevel(ctx, doguList.Items[0]).Return(loglevel.LevelDebug, nil).Once()
+
+		// - set log level
+		doguLevelHandler.EXPECT().SetLogLevel(ctx, doguList.Items[0], loglevel.LevelInfo).Return(nil).Once()
+
+		// - doguB
+		doguLevelHandler.EXPECT().GetLogLevel(ctx, doguList.Items[1]).Return(loglevel.LevelDebug, nil)
+
+		// - set log level
+		doguLevelHandler.EXPECT().SetLogLevel(ctx, doguList.Items[1], loglevel.LevelWarn).Return(nil)
+
+		// when
+		reconcile, err := dmc.Reconcile(ctx, request)
+
+		assert.Equal(t, ctrl.Result{RequeueAfter: reconcilerTimeoutInSec * time.Second}, reconcile)
+		assert.NoError(t, err)
+	})
+	t.Run("success deactive on deleted CR", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+		doguLevelHandler.EXPECT().Kind().Return("dogu")
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		request := ctrl.Request{
+			types.NamespacedName{
+				Namespace: "ecosystem",
+				Name:      "my_debug_mode",
+			},
+		}
+
+		notFoundErr := apierrors.NewNotFound(
+			schema.GroupResource{
+				Group:    "example.com",
+				Resource: "myresources",
+			},
+			request.Name,
+		)
+
+		// - get cr from requst
+		debugModeClient.EXPECT().Get(ctx, request.Name, metav1.GetOptions{}).Return(nil, notFoundErr)
+
+		// - create new statemap
+		cm := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "debugmode-state",
+			},
+			Data: map[string]string{
+				"dogu.doguA": "INFO",
+				"dogu.doguB": "WARN",
+			},
+		}
+		configMapClient.EXPECT().Get(ctx, "debugmode-state", metav1.GetOptions{}).Return(cm, nil)
 
 		// - iterate dogu list
 
