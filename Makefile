@@ -1,11 +1,12 @@
 # Set these to the desired values
 ARTIFACT_ID=k8s-debug-mode-operator
-VERSION=1.0.1
+VERSION=1.0.2
 IMAGE=cloudogu/${ARTIFACT_ID}:${VERSION}
-GOTAG=1.25.1
-MAKEFILES_VERSION=10.5.0
+GOTAG=1.26.0
+MAKEFILES_VERSION=10.6.0
 ADDITIONAL_CLEAN=dist-clean
 MOCKERY_VERSION=v2.53.3
+LINT_VERSION?=v2.9.0
 
 K8S_COMPONENT_SOURCE_VALUES = ${HELM_SOURCE_DIR}/values.yaml
 K8S_COMPONENT_TARGET_VALUES = ${HELM_TARGET_DIR}/values.yaml
@@ -25,7 +26,6 @@ include build/make/digital-signature.mk
 include build/make/mocks.mk
 
 include build/make/k8s-controller.mk
-include build/make/k8s.mk
 
 ##@ Deployment
 
