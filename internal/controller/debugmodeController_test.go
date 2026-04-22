@@ -2967,3 +2967,105 @@ func Test_DebugModeReconciler_Setup(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func Test_DebugModeReconciler_isCompleted(t *testing.T) {
+	t.Run("success completed", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		cr := &k8sCRLib.DebugMode{
+			Status: k8sCRLib.DebugModeStatus{Conditions: []metav1.Condition{
+				{Reason: string(k8sCRLib.DebugModeStatusCompleted)},
+			}},
+		}
+		// when
+		completed := dmc.isCompleted(cr)
+
+		// then
+		assert.True(t, completed)
+
+	})
+	t.Run("not completed", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		cr := &k8sCRLib.DebugMode{
+			Status: k8sCRLib.DebugModeStatus{Conditions: []metav1.Condition{
+				{Reason: string(k8sCRLib.DebugModeStatusWaitForRollback)},
+			}},
+		}
+		// when
+		completed := dmc.isCompleted(cr)
+
+		// then
+		assert.False(t, completed)
+
+	})
+	t.Run("empty cr no status", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		cr := &k8sCRLib.DebugMode{}
+		// when
+		completed := dmc.isCompleted(cr)
+
+		// then
+		assert.False(t, completed)
+
+	})
+	t.Run("empty cr nil", func(t *testing.T) {
+		// given
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+
+		doguLevelHandler := NewMockLogLevelHandler(t)
+
+		dmc := NewDebugModeReconciler(
+			debugModeClient,
+			doguClient,
+			configMapClient,
+			doguLevelHandler,
+		)
+
+		// when
+		completed := dmc.isCompleted(nil)
+
+		// then
+		assert.False(t, completed)
+
+	})
+}
