@@ -74,6 +74,10 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	var result ctrl.Result
 
+	if r.isCompleted(cr) {
+		return ctrl.Result{}, nil
+	}
+
 	if r.isActive(cr) {
 		result, err = r.activateDebugMode(ctx, cr, stateMap)
 	} else {
@@ -275,6 +279,19 @@ func (r *DebugModeReconciler) isActive(debugCR *k8sCRLib.DebugMode) bool {
 	after := debugCR.Spec.DeactivateTimestamp.After(time.Now())
 	defLogger.Info(fmt.Sprintf("Check if active: %s: %t", debugCR.Spec.DeactivateTimestamp, after))
 	return after
+}
+
+func (r *DebugModeReconciler) isCompleted(debugCR *k8sCRLib.DebugMode) bool {
+	if debugCR == nil {
+		defLogger.Info(fmt.Sprintf("CR deleted, completed: %t", false))
+		return false
+	}
+	for _, cond := range debugCR.Status.Conditions {
+		if cond.Reason == string(k8sCRLib.DebugModeStatusCompleted) {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *DebugModeReconciler) iterateElementsForDebugMode(ctx context.Context, activate bool, stateMap *StateMap, targetLogLevel loglevel.LogLevel, logger logging.Logger) (bool, error) {
