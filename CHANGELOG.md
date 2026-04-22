@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.0.3] - 2026-04-22
+### Fixed
+- [#15] do not reconcile completed debug mode-CRs
+
 ## [v1.0.2] - 2026-02-17
 ### Security
 - [#13] Fix Golang stdlib CVE-2025-68121

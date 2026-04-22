@@ -1,7 +1,7 @@
 apiVersion: v1
 values:
   images:
-    debugModeOperator: docker.io/cloudogu/k8s-debug-mode-operator:1.0.2
+    debugModeOperator: docker.io/cloudogu/k8s-debug-mode-operator:1.0.3
 patches:
   values.yaml:
     manager:
