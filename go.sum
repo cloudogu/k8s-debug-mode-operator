@@ -46,6 +46,8 @@ github.com/cloudogu/cesapp-lib v0.18.2 h1:S89A8WrDi51iYutCnMdIZ24lMrDmIBCbYUIHhs
 github.com/cloudogu/cesapp-lib v0.18.2/go.mod h1:8EIoGAI5WcwQH803FGjwF0I4sNPPcyTW8YPDtwdi+FM=
 github.com/cloudogu/k8s-component-operator v1.10.0 h1:EWo+hihX49cCTXPFoXqINPNsUTTGLs+izC+4yazcRUY=
 github.com/cloudogu/k8s-component-operator v1.10.0/go.mod h1:/3K3bXgMfeQtxIeEa5w2yWv9dxEfqtpcgcoD5gUZpx0=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260706091108-4faa2b16ed09 h1:XTL0DtOZd7nKFWOzpVb5of0lUK59a5fTyu2eurDtxQQ=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260706091108-4faa2b16ed09/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
 github.com/cloudogu/k8s-debug-mode-cr-lib v1.0.0 h1:geZjXwWQY8d8aEWA9l2is/DwlADdOHQveBokPK63XH0=
 github.com/cloudogu/k8s-debug-mode-cr-lib v1.0.0/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
 github.com/cloudogu/k8s-dogu-lib/v2 v2.11.0 h1:Jk8vsCUPE7nqth51CZPhTjv4LDciiBWomNLlAE5W5xs=
