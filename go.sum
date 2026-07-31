@@ -48,6 +48,10 @@ github.com/cloudogu/k8s-component-operator v1.10.0 h1:EWo+hihX49cCTXPFoXqINPNsUT
 github.com/cloudogu/k8s-component-operator v1.10.0/go.mod h1:/3K3bXgMfeQtxIeEa5w2yWv9dxEfqtpcgcoD5gUZpx0=
 github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260706091108-4faa2b16ed09 h1:XTL0DtOZd7nKFWOzpVb5of0lUK59a5fTyu2eurDtxQQ=
 github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260706091108-4faa2b16ed09/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260731063445-9a0507b10251 h1:kMaC33+/C/TTIQy4Cj5a5hQyZwtEYQix51Ds3ifCMX8=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260731063445-9a0507b10251/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260731071811-8c59d9f33131 h1:NFRAo/gR45Q/grZnPms3E2axNNsIwSPoAWv7AV12VOQ=
+github.com/cloudogu/k8s-debug-mode-cr-lib v0.0.0-20260731071811-8c59d9f33131/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
 github.com/cloudogu/k8s-debug-mode-cr-lib v1.0.0 h1:geZjXwWQY8d8aEWA9l2is/DwlADdOHQveBokPK63XH0=
 github.com/cloudogu/k8s-debug-mode-cr-lib v1.0.0/go.mod h1:OPAO5P5ZSZkEexP9YOWNj4wEE8T3wqs92yyP5muymxQ=
 github.com/cloudogu/k8s-dogu-lib/v2 v2.11.0 h1:Jk8vsCUPE7nqth51CZPhTjv4LDciiBWomNLlAE5W5xs=

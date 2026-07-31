@@ -88,17 +88,24 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Error(fmt.Sprintf("Reconciling failed: %v", err))
 		// Update Phase to Failed
 		var updateerror error
-		_, updateerror = r.debugModeInterface.AddOrUpdateLogLevelsSet(ctx, cr, false, fmt.Sprintf("%v", err), "Failed")
+		cr, updateerror = r.debugModeInterface.AddOrUpdateFailed(ctx, cr, true, fmt.Sprintf("%v", err), "Failed")
 		if updateerror != nil {
 			return ctrl.Result{}, updateerror
 		}
-		_, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
+		cr, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
 		if updateerror != nil {
 			return ctrl.Result{}, updateerror
 		}
 
 		return ctrl.Result{}, err
 	}
+
+	var updateerror error
+	cr, updateerror = r.debugModeInterface.RemoveFailed(ctx, cr)
+	if updateerror != nil {
+		return ctrl.Result{}, updateerror
+	}
+
 	return result, nil
 }
 
