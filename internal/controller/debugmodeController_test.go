@@ -8,6 +8,7 @@ import (
 	"github.com/cloudogu/k8s-debug-mode-operator/internal/loglevel"
 	v2 "github.com/cloudogu/k8s-dogu-lib/v2/api/v2"
 	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -289,6 +290,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		// - set log level
 		doguLevelHandler.EXPECT().SetLogLevel(ctx, doguList.Items[1], loglevel.LevelDebug).Return(nil)
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed").Return(cr, nil).Once()
+
 		// when
 		reconcile, err := dmc.Reconcile(ctx, request)
 
@@ -423,6 +426,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 
 		debugModeClient.EXPECT().UpdateStatusWaitForRollback(ctx, crWithState3).Return(crWithState4, nil)
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed").Return(cr, nil).Once()
+
 		// when
 		reconcile, err := dmc.Reconcile(ctx, request)
 
@@ -483,6 +488,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -562,6 +569,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -639,6 +648,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -773,6 +784,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -916,6 +929,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -1013,6 +1028,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -1115,6 +1132,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -1228,6 +1247,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -1345,6 +1366,8 @@ func Test_DebugModeReconciler_ActivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -1460,6 +1483,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 
 		// - set log level
 		doguLevelHandler.EXPECT().SetLogLevel(ctx, doguList.Items[1], loglevel.LevelWarn).Return(nil)
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed").Return(cr, nil).Once()
 
 		// when
 		reconcile, err := dmc.Reconcile(ctx, request)
@@ -1675,6 +1700,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 
 		debugModeClient.EXPECT().UpdateStatusCompleted(ctx, crWithState3).Return(crWithState4, nil)
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed").Return(cr, nil).Once()
+
 		// when
 		reconcile, err := dmc.Reconcile(ctx, request)
 
@@ -1739,6 +1766,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -1821,6 +1850,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -1901,6 +1932,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2004,6 +2037,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2110,6 +2145,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2218,6 +2255,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -2323,6 +2362,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2433,6 +2474,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2546,6 +2589,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2672,6 +2717,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		crWithState1.Status = k8sCRLib.DebugModeStatus{
 			Phase: "Failed",
 		}
+
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
 
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
@@ -2806,6 +2853,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, nil)
 
 		// when
@@ -2926,6 +2975,8 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 			Phase: "Failed",
 		}
 
+		debugModeClient.EXPECT().AddOrUpdateFailed(ctx, cr, true, mock.Anything, "Failed").Return(cr, nil).Once()
+
 		debugModeClient.EXPECT().UpdateStatusFailed(ctx, cr).Return(crWithState1, assert.AnError)
 
 		// when
@@ -2934,6 +2985,123 @@ func Test_DebugModeReconciler_DeactivateDebugMode(t *testing.T) {
 		assert.Equal(t, ctrl.Result{RequeueAfter: 0}, reconcile)
 		assert.Error(t, err)
 
+	})
+}
+
+func Test_DebugModeReconciler_ReconcileFailedCondition(t *testing.T) {
+	ctx := t.Context()
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: "my-debug-mode"}}
+
+	t.Run("clears failed condition for completed debug mode", func(t *testing.T) {
+		debugModeClient := newMockDebugModeInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+		reconciler := NewDebugModeReconciler(debugModeClient, newMockDoguInterface(t), configMapClient, NewMockLogLevelHandler(t))
+		cr := &k8sCRLib.DebugMode{Status: k8sCRLib.DebugModeStatus{Conditions: []metav1.Condition{{
+			Type: k8sCRLib.ConditionLogLevelSet, Status: metav1.ConditionFalse, Reason: string(k8sCRLib.DebugModeStatusCompleted),
+		}}}}
+
+		debugModeClient.EXPECT().Get(ctx, request.Name, metav1.GetOptions{}).Return(cr, nil)
+		configMapClient.EXPECT().Get(ctx, DEFAULT_CM_NAME, metav1.GetOptions{}).Return(&corev1.ConfigMap{}, nil)
+		debugModeClient.EXPECT().
+			AddOrUpdateFailed(ctx, cr, false, "Debugmode completed successfully", "Failed").
+			Return(cr, nil).
+			Once()
+
+		result, err := reconciler.Reconcile(ctx, request)
+
+		assert.NoError(t, err)
+		assert.Equal(t, ctrl.Result{}, result)
+	})
+
+	t.Run("returns error when clearing failed condition for completed debug mode fails", func(t *testing.T) {
+		debugModeClient := newMockDebugModeInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+		reconciler := NewDebugModeReconciler(debugModeClient, newMockDoguInterface(t), configMapClient, NewMockLogLevelHandler(t))
+		cr := &k8sCRLib.DebugMode{Status: k8sCRLib.DebugModeStatus{Conditions: []metav1.Condition{{
+			Type: k8sCRLib.ConditionLogLevelSet, Status: metav1.ConditionFalse, Reason: string(k8sCRLib.DebugModeStatusCompleted),
+		}}}}
+
+		debugModeClient.EXPECT().Get(ctx, request.Name, metav1.GetOptions{}).Return(cr, nil)
+		configMapClient.EXPECT().Get(ctx, DEFAULT_CM_NAME, metav1.GetOptions{}).Return(&corev1.ConfigMap{}, nil)
+		debugModeClient.EXPECT().
+			AddOrUpdateFailed(ctx, cr, false, "Debugmode completed successfully", "Failed").
+			Return(nil, assert.AnError).
+			Once()
+
+		result, err := reconciler.Reconcile(ctx, request)
+
+		assert.ErrorIs(t, err, assert.AnError)
+		assert.Equal(t, ctrl.Result{}, result)
+	})
+
+	t.Run("returns error when setting failed condition fails", func(t *testing.T) {
+		debugModeClient := newMockDebugModeInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+		reconciler := NewDebugModeReconciler(debugModeClient, newMockDoguInterface(t), configMapClient, NewMockLogLevelHandler(t))
+		cr := &k8sCRLib.DebugMode{Spec: k8sCRLib.DebugModeSpec{
+			DeactivateTimestamp: metav1.NewTime(time.Now().Add(time.Minute)), TargetLogLevel: "debug",
+		}}
+		expectedMessage := "ERROR failed to set phase SetDebugMode: " + assert.AnError.Error()
+
+		debugModeClient.EXPECT().Get(ctx, request.Name, metav1.GetOptions{}).Return(cr, nil)
+		configMapClient.EXPECT().Get(ctx, DEFAULT_CM_NAME, metav1.GetOptions{}).Return(&corev1.ConfigMap{}, nil)
+		debugModeClient.EXPECT().UpdateStatusDebugModeSet(ctx, cr).Return(nil, assert.AnError)
+		debugModeClient.EXPECT().
+			AddOrUpdateFailed(ctx, cr, true, expectedMessage, "Failed").
+			Return(nil, apierrors.NewInternalError(assert.AnError)).
+			Once()
+
+		result, err := reconciler.Reconcile(ctx, request)
+
+		assert.Error(t, err)
+		assert.Equal(t, ctrl.Result{}, result)
+	})
+
+	t.Run("returns error when clearing failed condition after success fails", func(t *testing.T) {
+		debugModeClient := newMockDebugModeInterface(t)
+		doguClient := newMockDoguInterface(t)
+		configMapClient := newMockConfigurationMap(t)
+		reconciler := NewDebugModeReconciler(debugModeClient, doguClient, configMapClient, NewMockLogLevelHandler(t))
+		cr := &k8sCRLib.DebugMode{Spec: k8sCRLib.DebugModeSpec{
+			DeactivateTimestamp: metav1.NewTime(time.Now().Add(-time.Minute)), TargetLogLevel: "debug",
+		}}
+		crWithPhase := cr.DeepCopy()
+		crWithPhase.Status.Phase = k8sCRLib.DebugModeStatusRollback
+		crWithRollbackCondition := crWithPhase.DeepCopy()
+		crWithRollbackCondition.Status.Conditions = []metav1.Condition{{
+			Type: k8sCRLib.ConditionLogLevelSet, Status: metav1.ConditionFalse,
+			Reason: string(k8sCRLib.DebugModeStatusRollback), Message: "Deactivating Debug-Mode in progress",
+		}}
+		crWithCompletedCondition := crWithRollbackCondition.DeepCopy()
+		crWithCompletedCondition.Status.Conditions[0] = metav1.Condition{
+			Type: k8sCRLib.ConditionLogLevelSet, Status: metav1.ConditionFalse,
+			Reason: string(k8sCRLib.DebugModeStatusCompleted), Message: "Debug-Mode deactivated",
+		}
+		crCompleted := crWithCompletedCondition.DeepCopy()
+		crCompleted.Status.Phase = k8sCRLib.DebugModeStatusCompleted
+		stateMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: DEFAULT_CM_NAME}}
+
+		debugModeClient.EXPECT().Get(ctx, request.Name, metav1.GetOptions{}).Return(cr, nil)
+		configMapClient.EXPECT().Get(ctx, DEFAULT_CM_NAME, metav1.GetOptions{}).Return(stateMap, nil).Twice()
+		debugModeClient.EXPECT().UpdateStatusRollback(ctx, cr).Return(crWithPhase, nil)
+		debugModeClient.EXPECT().
+			AddOrUpdateLogLevelsSet(ctx, crWithPhase, false, "Deactivating Debug-Mode in progress", string(k8sCRLib.DebugModeStatusRollback)).
+			Return(crWithRollbackCondition, nil)
+		doguClient.EXPECT().List(ctx, metav1.ListOptions{}).Return(&v2.DoguList{}, nil)
+		configMapClient.EXPECT().Delete(ctx, DEFAULT_CM_NAME, metav1.DeleteOptions{}).Return(nil)
+		debugModeClient.EXPECT().
+			AddOrUpdateLogLevelsSet(ctx, crWithRollbackCondition, false, "Debug-Mode deactivated", string(k8sCRLib.DebugModeStatusCompleted)).
+			Return(crWithCompletedCondition, nil)
+		debugModeClient.EXPECT().UpdateStatusCompleted(ctx, crWithCompletedCondition).Return(crCompleted, nil)
+		debugModeClient.EXPECT().
+			AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed").
+			Return(nil, assert.AnError).
+			Once()
+
+		result, err := reconciler.Reconcile(ctx, request)
+
+		assert.ErrorIs(t, err, assert.AnError)
+		assert.Equal(t, ctrl.Result{}, result)
 	})
 }
 
