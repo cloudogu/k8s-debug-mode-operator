@@ -75,6 +75,11 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	var result ctrl.Result
 
 	if r.isCompleted(cr) {
+		var updateerror error
+		cr, updateerror = r.debugModeInterface.AddOrUpdateFailed(ctx, cr, false, "Debugmode completed successfully", "Failed")
+		if updateerror != nil {
+			return ctrl.Result{}, updateerror
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -85,14 +90,29 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if err != nil {
-		var updateerror error
-		_, updateerror = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
-		if updateerror != nil {
-			return ctrl.Result{}, updateerror
-		}
 		logger.Error(fmt.Sprintf("Reconciling failed: %v", err))
+		if cr != nil {
+			var updateError error
+			cr, updateError = r.debugModeInterface.AddOrUpdateFailed(ctx, cr, true, err.Error(), "Failed")
+			if updateError != nil {
+				return ctrl.Result{}, updateError
+			}
+			_, updateError = r.debugModeInterface.UpdateStatusFailed(ctx, cr)
+			if updateError != nil {
+				return ctrl.Result{}, updateError
+			}
+		}
+
 		return ctrl.Result{}, err
 	}
+
+	if cr != nil {
+		_, updateError := r.debugModeInterface.AddOrUpdateFailed(ctx, cr, false, "Reconcilation Successfull", "Failed")
+		if updateError != nil {
+			return ctrl.Result{}, updateError
+		}
+	}
+
 	return result, nil
 }
 
