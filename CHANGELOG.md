@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - [#17] add german translation for usage.md
+- [#20] store errormessage in condition
 
 ## [v1.0.3] - 2026-04-22
 ### Fixed
