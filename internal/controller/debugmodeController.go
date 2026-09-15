@@ -76,7 +76,7 @@ func (r *DebugModeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if r.isCompleted(cr) {
 		var updateerror error
-		cr, updateerror = r.debugModeInterface.AddOrUpdateFailed(ctx, cr, false, "Debugmode completed successfully", "Failed")
+		_, updateerror = r.debugModeInterface.AddOrUpdateFailed(ctx, cr, false, "Debugmode completed successfully", "Failed")
 		if updateerror != nil {
 			return ctrl.Result{}, updateerror
 		}
